@@ -19,13 +19,13 @@ type Source interface {
 	Reload(string) error
 }
 
-type CachedSource struct {
+type MapSource struct {
 	profilemap  sync.Map
 	accountsmap sync.Map
 	statusmap   sync.Map
 }
 
-func (s *CachedSource) LoadProfile(service *Service, idlist ...string) (map[string]*profile.Profile, error) {
+func (s *MapSource) LoadProfile(service *Service, idlist ...string) (map[string]*profile.Profile, error) {
 	result := map[string]*profile.Profile{}
 	for k := range idlist {
 		v, ok := s.profilemap.Load(idlist[k])
@@ -35,13 +35,13 @@ func (s *CachedSource) LoadProfile(service *Service, idlist ...string) (map[stri
 	}
 	return result, nil
 }
-func (s *CachedSource) SetProfile(m map[string]*profile.Profile) error {
+func (s *MapSource) SetProfile(m map[string]*profile.Profile) error {
 	for k := range m {
 		s.profilemap.Store(k, m[k])
 	}
 	return nil
 }
-func (s *CachedSource) LoadAccounts(service *Service, idlist ...string) (map[string]*user.Accounts, error) {
+func (s *MapSource) LoadAccounts(service *Service, idlist ...string) (map[string]*user.Accounts, error) {
 	result := map[string]*user.Accounts{}
 	for k := range idlist {
 		v, ok := s.accountsmap.Load(idlist[k])
@@ -51,14 +51,14 @@ func (s *CachedSource) LoadAccounts(service *Service, idlist ...string) (map[str
 	}
 	return result, nil
 }
-func (s *CachedSource) SetAccounts(m map[string]*user.Accounts) error {
+func (s *MapSource) SetAccounts(m map[string]*user.Accounts) error {
 	for k := range m {
 		s.accountsmap.Store(k, m[k])
 	}
 	return nil
 }
 
-func (s *CachedSource) LoadStatus(service *Service, idlist ...string) (map[string]status.Status, error) {
+func (s *MapSource) LoadStatus(service *Service, idlist ...string) (map[string]status.Status, error) {
 	result := map[string]status.Status{}
 	for k := range idlist {
 		v, ok := s.statusmap.Load(idlist[k])
@@ -69,7 +69,7 @@ func (s *CachedSource) LoadStatus(service *Service, idlist ...string) (map[strin
 	return result, nil
 
 }
-func (s *CachedSource) SetStatus(m map[string]status.Status) error {
+func (s *MapSource) SetStatus(m map[string]status.Status) error {
 	for k := range m {
 		s.statusmap.Store(k, m[k])
 	}
@@ -77,15 +77,15 @@ func (s *CachedSource) SetStatus(m map[string]status.Status) error {
 }
 
 //Reload reload user data
-func (s *CachedSource) Reload(id string) error {
+func (s *MapSource) Reload(id string) error {
 	s.statusmap.Delete(id)
 	s.profilemap.Delete(id)
 	s.accountsmap.Delete(id)
 	return nil
 }
 
-func NewCachedSource() *CachedSource {
-	return &CachedSource{}
+func NewMapSource() *MapSource {
+	return &MapSource{}
 }
 
 type SourceService interface {
@@ -111,6 +111,6 @@ func (f SourceServiceFunc) Stop() error {
 	return nil
 }
 
-var CachedSourceService = SourceServiceFunc(func() (Source, error) {
-	return NewCachedSource(), nil
+var MapSourceService = SourceServiceFunc(func() (Source, error) {
+	return NewMapSource(), nil
 })
