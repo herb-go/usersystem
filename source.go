@@ -9,11 +9,11 @@ import (
 )
 
 type Source interface {
-	LoadProfile(service *Service, idlist ...string) (map[string]*profile.Profile, error)
+	LoadProfile(system *System, idlist ...string) (map[string]*profile.Profile, error)
 	SetProfile(map[string]*profile.Profile) error
-	LoadAccounts(service *Service, idlist ...string) (map[string]*user.Accounts, error)
+	LoadAccounts(system *System, idlist ...string) (map[string]*user.Accounts, error)
 	SetAccounts(map[string]*user.Accounts) error
-	LoadStatus(service *Service, idlist ...string) (map[string]status.Status, error)
+	LoadStatus(system *System, idlist ...string) (map[string]status.Status, error)
 	SetStatus(map[string]status.Status) error
 	//Reload reload user data
 	Reload(string) error
@@ -25,7 +25,7 @@ type MapSource struct {
 	statusmap   sync.Map
 }
 
-func (s *MapSource) LoadProfile(service *Service, idlist ...string) (map[string]*profile.Profile, error) {
+func (s *MapSource) LoadProfile(system *System, idlist ...string) (map[string]*profile.Profile, error) {
 	result := map[string]*profile.Profile{}
 	for k := range idlist {
 		v, ok := s.profilemap.Load(idlist[k])
@@ -41,7 +41,7 @@ func (s *MapSource) SetProfile(m map[string]*profile.Profile) error {
 	}
 	return nil
 }
-func (s *MapSource) LoadAccounts(service *Service, idlist ...string) (map[string]*user.Accounts, error) {
+func (s *MapSource) LoadAccounts(system *System, idlist ...string) (map[string]*user.Accounts, error) {
 	result := map[string]*user.Accounts{}
 	for k := range idlist {
 		v, ok := s.accountsmap.Load(idlist[k])
@@ -58,7 +58,7 @@ func (s *MapSource) SetAccounts(m map[string]*user.Accounts) error {
 	return nil
 }
 
-func (s *MapSource) LoadStatus(service *Service, idlist ...string) (map[string]status.Status, error) {
+func (s *MapSource) LoadStatus(system *System, idlist ...string) (map[string]status.Status, error) {
 	result := map[string]status.Status{}
 	for k := range idlist {
 		v, ok := s.statusmap.Load(idlist[k])

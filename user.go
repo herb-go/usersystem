@@ -6,8 +6,8 @@ type User struct {
 }
 
 type Users struct {
-	Service *Service
-	source  Source
+	System *System
+	source Source
 }
 
 func NewUsers() *Users {
@@ -18,4 +18,9 @@ func (u *Users) User(id string) *User {
 		users: u,
 		ID:    id,
 	}
+}
+
+//Reload reload user data
+func (u *Users) Reload(id string) error {
+	return Reload(id, u.source, u.System)
 }
