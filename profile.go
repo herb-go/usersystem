@@ -9,4 +9,6 @@ type ProfileService interface {
 	Start() error
 	//Stop stop service
 	Stop() error
+	//Reload reload user data
+	Reload(string) error
 }

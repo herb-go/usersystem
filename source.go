@@ -15,6 +15,8 @@ type Source interface {
 	SetAccounts(map[string]*user.Accounts) error
 	LoadStatus(service *Service, idlist ...string) (map[string]status.Status, error)
 	SetStatus(map[string]status.Status) error
+	//Reload reload user data
+	Reload(string) error
 }
 
 type CachedSource struct {
@@ -74,6 +76,14 @@ func (s *CachedSource) SetStatus(m map[string]status.Status) error {
 	return nil
 }
 
+//Reload reload user data
+func (s *CachedSource) Reload(id string) error {
+	s.statusmap.Delete(id)
+	s.profilemap.Delete(id)
+	s.accountsmap.Delete(id)
+	return nil
+}
+
 func NewCachedSource() *CachedSource {
 	return &CachedSource{}
 }
@@ -84,6 +94,8 @@ type SourceService interface {
 	Start() error
 	//Stop stop service
 	Stop() error
+	//Reload reload user data
+	Reload(string) error
 }
 
 type SourceServiceFunc func() (Source, error)
