@@ -6,7 +6,6 @@ import (
 	"github.com/herb-go/herb/user"
 	"github.com/herb-go/herb/user/profile"
 	"github.com/herb-go/herb/user/status"
-	"github.com/herb-go/herbsecurity/authorize/role"
 )
 
 type Source interface {
@@ -14,8 +13,6 @@ type Source interface {
 	SetProfile(map[string]*profile.Profile) error
 	LoadAccounts(service *Service, idlist ...string) (map[string]*user.Accounts, error)
 	SetAccounts(map[string]*user.Accounts) error
-	LoadRoles(service *Service, idlist ...string) (map[string]*role.Roles, error)
-	SetRoles(map[string]status.Status) error
 	LoadStatus(service *Service, idlist ...string) (map[string]status.Status, error)
 	SetStatus(map[string]status.Status) error
 }
@@ -23,7 +20,6 @@ type Source interface {
 type CachedSource struct {
 	profilemap  sync.Map
 	accountsmap sync.Map
-	rolesmap    sync.Map
 	statusmap   sync.Map
 }
 
@@ -59,22 +55,7 @@ func (s *CachedSource) SetAccounts(m map[string]*user.Accounts) error {
 	}
 	return nil
 }
-func (s *CachedSource) LoadRoles(service *Service, idlist ...string) (map[string]*role.Roles, error) {
-	result := map[string]*role.Roles{}
-	for k := range idlist {
-		v, ok := s.rolesmap.Load(idlist[k])
-		if ok {
-			result[idlist[k]] = v.(*role.Roles)
-		}
-	}
-	return result, nil
-}
-func (s *CachedSource) SetRoles(m map[string]status.Status) error {
-	for k := range m {
-		s.rolesmap.Store(k, m[k])
-	}
-	return nil
-}
+
 func (s *CachedSource) LoadStatus(service *Service, idlist ...string) (map[string]status.Status, error) {
 	result := map[string]status.Status{}
 	for k := range idlist {
