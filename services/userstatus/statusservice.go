@@ -1,4 +1,4 @@
-package usersystem
+package userstatus
 
 import "github.com/herb-go/herb/user/status"
 
