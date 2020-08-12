@@ -49,7 +49,7 @@ func (s *UserStatus) ServiceActions() []*herbsystem.Action {
 	return []*herbsystem.Action{
 		userdataset.InitDatasetTypeAction(DatatypeStatus),
 		useravaliable.Wrap(s.IsUserAvaliable),
-		userpurge.Wrap(s.StatusService),
+		userpurge.Wrap(s),
 	}
 }
 func (s *UserStatus) IsUserAvaliable(id string) (bool, error) {
