@@ -1,4 +1,4 @@
-package reloaduser
+package userreload
 
 import (
 	"context"

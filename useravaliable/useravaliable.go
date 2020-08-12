@@ -7,6 +7,14 @@ import (
 	"github.com/herb-go/usersystem"
 )
 
+type Result struct {
+	Avaliable bool
+}
+
+func GetResult(ctx context.Context) *Result {
+	return ctx.Value(ContextKeyNotAvaliable).(*Result)
+}
+
 var ContextKeyNotAvaliable = usersystem.ContextKey("notavaliable")
 var Command = herbsystem.Command("avaliable")
 
@@ -19,7 +27,8 @@ func Wrap(h func(string) (bool, error)) *herbsystem.Action {
 			return err
 		}
 		if !result {
-			ctx = context.WithValue(ctx, ContextKeyNotAvaliable, true)
+			r := GetResult(ctx)
+			r.Avaliable = false
 			return nil
 		}
 		return next(ctx)
@@ -29,10 +38,13 @@ func Wrap(h func(string) (bool, error)) *herbsystem.Action {
 
 func ExecAvaliable(s *usersystem.UserSystem, uid string) (bool, error) {
 	ctx := usersystem.UIDContext(s.Context, uid)
-	ctx = context.WithValue(ctx, ContextKeyNotAvaliable, false)
+	result := &Result{
+		Avaliable: true,
+	}
+	ctx = context.WithValue(ctx, ContextKeyNotAvaliable, result)
 	ctx, err := s.System.ExecActions(ctx, Command)
 	if err != nil {
 		return false, err
 	}
-	return !ctx.Value(ContextKeyNotAvaliable).(bool), nil
+	return result.Avaliable, nil
 }

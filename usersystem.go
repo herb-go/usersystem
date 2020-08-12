@@ -7,6 +7,7 @@ import (
 )
 
 type UserSystem struct {
+	Keyword Keyword
 	Context context.Context
 	*herbsystem.System
 }
