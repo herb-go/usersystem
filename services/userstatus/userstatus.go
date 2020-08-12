@@ -24,33 +24,33 @@ func SetStatus(ds usersystem.Dataset, id string, st status.Status) {
 	ds.Set(DatatypeStatus, id, st)
 }
 
-type UserStauts struct {
+type UserStatus struct {
 	herbsystem.NopService
 	StatusService
 }
 
-func New() *UserStauts {
-	return &UserStauts{}
+func New() *UserStatus {
+	return &UserStatus{}
 }
-func (s *UserStauts) InitService() error {
+func (s *UserStatus) InitService() error {
 	return nil
 }
-func (s *UserStauts) ServiceName() string {
+func (s *UserStatus) ServiceName() string {
 	return ServiceName
 }
-func (s *UserStauts) StartService() error {
+func (s *UserStatus) StartService() error {
 	return s.StatusService.Start()
 }
-func (s *UserStauts) StopService() error {
+func (s *UserStatus) StopService() error {
 	return s.StatusService.Stop()
 }
-func (s *UserStauts) ServiceActions() []*herbsystem.Action {
+func (s *UserStatus) ServiceActions() []*herbsystem.Action {
 	return []*herbsystem.Action{
 		userdataset.InitDatasetTypeAction(DatatypeStatus),
 		useravaliable.Wrap(s.IsUserAvaliable),
 	}
 }
-func (s *UserStauts) IsUserAvaliable(id string) (bool, error) {
+func (s *UserStatus) IsUserAvaliable(id string) (bool, error) {
 	result, err := s.StatusService.LoadStatus(id)
 	if err != nil {
 		return false, err
@@ -61,7 +61,7 @@ func (s *UserStauts) IsUserAvaliable(id string) (bool, error) {
 	}
 	return s.StatusService.IsAvailable(st)
 }
-func (s *UserStauts) LoadStatus(dataset usersystem.Dataset, passthrough bool, idlist ...string) (map[string]status.Status, error) {
+func (s *UserStatus) LoadStatus(dataset usersystem.Dataset, passthrough bool, idlist ...string) (map[string]status.Status, error) {
 	result := map[string]status.Status{}
 	unloaded := make([]string, 0, len(idlist))
 	for _, v := range idlist {
@@ -85,7 +85,7 @@ func (s *UserStauts) LoadStatus(dataset usersystem.Dataset, passthrough bool, id
 	}
 	return result, nil
 }
-func (s *UserStauts) UpdateStatus(dataset usersystem.Dataset, id string, st status.Status) error {
+func (s *UserStatus) UpdateStatus(dataset usersystem.Dataset, id string, st status.Status) error {
 	err := s.StatusService.UpdateStatus(id, st)
 	if err != nil {
 		return err
@@ -96,7 +96,7 @@ func (s *UserStauts) UpdateStatus(dataset usersystem.Dataset, id string, st stat
 	return nil
 }
 
-func MustNewUserstatus(s *usersystem.UserSystem) *UserStauts {
+func MustNewUserstatus(s *usersystem.UserSystem) *UserStatus {
 	status := New()
 	err := s.InstallService(status)
 	if err != nil {
