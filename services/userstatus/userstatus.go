@@ -6,6 +6,7 @@ import (
 	"github.com/herb-go/usersystem"
 	"github.com/herb-go/usersystem/useravaliable"
 	"github.com/herb-go/usersystem/userdataset"
+	"github.com/herb-go/usersystem/userpurge"
 )
 
 var ServiceName = "status"
@@ -48,6 +49,7 @@ func (s *UserStatus) ServiceActions() []*herbsystem.Action {
 	return []*herbsystem.Action{
 		userdataset.InitDatasetTypeAction(DatatypeStatus),
 		useravaliable.Wrap(s.IsUserAvaliable),
+		userpurge.Wrap(s.StatusService),
 	}
 }
 func (s *UserStatus) IsUserAvaliable(id string) (bool, error) {

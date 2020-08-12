@@ -10,6 +10,6 @@ type StatusService interface {
 	Start() error
 	//Stop stop service
 	Stop() error
-	//Reload reload user data
-	Reload(string) error
+	//Purge purge user data cache
+	Purge(string) error
 }
