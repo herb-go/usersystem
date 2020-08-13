@@ -1,12 +1,14 @@
-package userchecksession
+package usersession
 
 import (
-	"testing"
-
 	"github.com/herb-go/herbsecurity/authority"
 	"github.com/herb-go/herbsystem"
 	"github.com/herb-go/usersystem"
 )
+
+var payloads = authority.NewPayloads()
+
+var lastactive = ""
 
 type testSession string
 
@@ -20,7 +22,7 @@ func (s testSession) UID() (string, error) {
 	return string(s), nil
 }
 func (s testSession) Payloads() (*authority.Payloads, error) {
-	return nil, nil
+	return payloads, nil
 }
 func (s testSession) Destory() error {
 	return nil
@@ -44,24 +46,16 @@ type testService struct {
 
 func (s *testService) ServiceActions() []*herbsystem.Action {
 	return []*herbsystem.Action{
-		Wrap(func(session usersystem.Session, id string, payloads *authority.Payloads) (bool, error) {
+		WrapCheckSession(func(session usersystem.Session, id string, payloads *authority.Payloads) (bool, error) {
 			return id == "exists", nil
 		}),
-	}
-}
-func TestAvaliable(t *testing.T) {
-	s := usersystem.New()
-	s.InstallService(&testService{})
-	s.Ready()
-	s.Configuring()
-	s.Start()
-	defer s.Stop()
-	ok, err := ExecCheckSession(s, testSession("exists"))
-	if !ok || err != nil {
-		t.Fatal(ok, err)
-	}
-	ok, err = ExecCheckSession(s, testSession("notexists"))
-	if ok || err != nil {
-		t.Fatal(ok, err)
+		WrapInitPayloads(func(session usersystem.Session, id string, payloads *authority.Payloads) error {
+			payloads.Set("test", []byte("testvalue"))
+			return nil
+		}),
+		WrapOnSessionActive(func(session usersystem.Session, id string) error {
+			lastactive = id
+			return nil
+		}),
 	}
 }

@@ -1,4 +1,4 @@
-package userchecksession
+package usersession
 
 import (
 	"context"
@@ -12,23 +12,23 @@ type Result struct {
 	Success bool
 }
 
-var ContextKeyCheckSessionResult = usersystem.ContextKey("checksession.result")
+var ContextKeyCheckSessionResult = usersystem.ContextKey("usersession.result")
 
 func GetResult(ctx context.Context) *Result {
 	return ctx.Value(ContextKeyCheckSessionResult).(*Result)
 }
 
-var ContextKeyPayloads = usersystem.ContextKey("checksession.payloads")
+var ContextKeyPayloads = usersystem.ContextKey("usersession.payloads")
 
 func GetPayloads(ctx context.Context) *authority.Payloads {
 	return ctx.Value(ContextKeyPayloads).(*authority.Payloads)
 }
 
-var Command = herbsystem.Command("checksession")
+var CommandCheckSession = herbsystem.Command("checksession")
 
-func Wrap(h func(usersystem.Session, string, *authority.Payloads) (bool, error)) *herbsystem.Action {
+func WrapCheckSession(h func(usersystem.Session, string, *authority.Payloads) (bool, error)) *herbsystem.Action {
 	a := herbsystem.NewAction()
-	a.Command = Command
+	a.Command = CommandCheckSession
 	a.Handler = func(ctx context.Context, next func(context.Context) error) error {
 		result, err := h(usersystem.GetSession(ctx), usersystem.GetUID(ctx), GetPayloads(ctx))
 		if err != nil {
@@ -61,7 +61,7 @@ func ExecCheckSession(s *usersystem.UserSystem, session usersystem.Session) (boo
 	}
 	ctx = context.WithValue(ctx, ContextKeyCheckSessionResult, result)
 
-	ctx, err = s.System.ExecActions(ctx, Command)
+	ctx, err = s.System.ExecActions(ctx, CommandCheckSession)
 	if err != nil {
 		return false, err
 	}

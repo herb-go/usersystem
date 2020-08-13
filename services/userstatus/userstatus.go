@@ -5,9 +5,9 @@ import (
 	"github.com/herb-go/herbsecurity/authority"
 	"github.com/herb-go/herbsystem"
 	"github.com/herb-go/usersystem"
-	"github.com/herb-go/usersystem/userchecksession"
 	"github.com/herb-go/usersystem/userdataset"
 	"github.com/herb-go/usersystem/userpurge"
+	"github.com/herb-go/usersystem/usersession"
 )
 
 var ServiceName = "status"
@@ -49,7 +49,7 @@ func (s *UserStatus) StopService() error {
 func (s *UserStatus) ServiceActions() []*herbsystem.Action {
 	return []*herbsystem.Action{
 		userdataset.InitDatasetTypeAction(DatatypeStatus),
-		userchecksession.Wrap(s.CheckSession),
+		usersession.WrapCheckSession(s.CheckSession),
 		userpurge.Wrap(s),
 	}
 }

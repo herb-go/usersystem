@@ -4,8 +4,8 @@ import (
 	"testing"
 
 	"github.com/herb-go/herbsecurity/authority"
-	"github.com/herb-go/usersystem/userchecksession"
 	"github.com/herb-go/usersystem/userpurge"
+	"github.com/herb-go/usersystem/usersession"
 
 	"github.com/herb-go/usersystem/userdataset"
 
@@ -148,15 +148,15 @@ func TestStatus(t *testing.T) {
 	if len(result) != 2 || result["test"] != status.StatusNormal || result["test2"] != status.StatusBanned || result["notexist"] != status.StatusUnkown {
 		t.Fatal(result["test2"])
 	}
-	ok, err = userchecksession.ExecCheckSession(s, testSession("test"))
+	ok, err = usersession.ExecCheckSession(s, testSession("test"))
 	if !ok || err != nil {
 		t.Fatal(ok, err)
 	}
-	ok, err = userchecksession.ExecCheckSession(s, testSession("test2"))
+	ok, err = usersession.ExecCheckSession(s, testSession("test2"))
 	if ok || err != nil {
 		t.Fatal(ok, err)
 	}
-	ok, err = userchecksession.ExecCheckSession(s, testSession("notexist"))
+	ok, err = usersession.ExecCheckSession(s, testSession("notexist"))
 	if ok || err != nil {
 		t.Fatal(ok, err)
 	}
