@@ -82,7 +82,7 @@ func (s *testService) ServiceActions() []*herbsystem.Action {
 			}
 			return []*ActiveSession{
 				&ActiveSession{
-					Session: testSession("active"),
+					SessionID: "active",
 				},
 			}, true, nil
 		}),

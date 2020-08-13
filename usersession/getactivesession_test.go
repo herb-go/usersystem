@@ -21,9 +21,8 @@ func TestGetActiveSessions(t *testing.T) {
 	if len(sessions) != 1 {
 		t.Fatal(sessions)
 	}
-	uid, err := sessions[0].Session.UID()
-	if uid != "active" || err != nil {
-		t.Fatal(uid, err)
+	if sessions[0].SessionID != "active" {
+		t.Fatal(s)
 	}
 	sessions, err = ExecGetActiveSessions(s, "notexists")
 	if err != nil {

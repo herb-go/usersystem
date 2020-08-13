@@ -9,7 +9,7 @@ import (
 )
 
 type ActiveSession struct {
-	Session    usersystem.Session
+	SessionID  string
 	LastActive time.Time
 }
 
