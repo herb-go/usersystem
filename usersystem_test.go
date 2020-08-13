@@ -1,16 +1,53 @@
 package usersystem
 
-import "testing"
+import (
+	"testing"
+
+	"github.com/herb-go/herbsecurity/authority"
+)
 
 var testType = Datatype("test")
 var testType2 = Datatype("test2")
 
+type testSession string
+
+func (s testSession) ID() string {
+	return ""
+}
+func (s testSession) Type() SessionType {
+	return ""
+}
+func (s testSession) UID() (string, error) {
+	return string(s), nil
+}
+func (s testSession) Payloads() (*authority.Payloads, error) {
+	return nil, nil
+}
+func (s testSession) Destory() error {
+	return nil
+}
+func (s testSession) Save(key string, v interface{}) error {
+	return nil
+}
+func (s testSession) Load(key string, v interface{}) error {
+	return nil
+}
+func (s testSession) Remove(key string) error {
+	return nil
+}
+func (s testSession) IsNotFoundError(err error) bool {
+	return false
+}
 func TestUserSystem(t *testing.T) {
 	s := New()
 	if GetUsersystem(s.Context) != s {
 		t.Fatal(s)
 	}
 	if GetUID(UIDContext(s.Context, "test")) != "test" {
+		t.Fatal(s)
+	}
+	session := testSession("test")
+	if GetSession(SessionContext(s.Context, session)) != session {
 		t.Fatal(s)
 	}
 	ds := NewPlainDataset()
