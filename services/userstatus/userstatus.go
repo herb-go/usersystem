@@ -2,9 +2,10 @@ package userstatus
 
 import (
 	"github.com/herb-go/herb/user/status"
+	"github.com/herb-go/herbsecurity/authority"
 	"github.com/herb-go/herbsystem"
 	"github.com/herb-go/usersystem"
-	"github.com/herb-go/usersystem/useravaliable"
+	"github.com/herb-go/usersystem/userchecksession"
 	"github.com/herb-go/usersystem/userdataset"
 	"github.com/herb-go/usersystem/userpurge"
 )
@@ -48,9 +49,12 @@ func (s *UserStatus) StopService() error {
 func (s *UserStatus) ServiceActions() []*herbsystem.Action {
 	return []*herbsystem.Action{
 		userdataset.InitDatasetTypeAction(DatatypeStatus),
-		useravaliable.Wrap(s.IsUserAvaliable),
+		userchecksession.Wrap(s.CheckSession),
 		userpurge.Wrap(s),
 	}
+}
+func (s *UserStatus) CheckSession(session usersystem.Session, id string, payloads *authority.Payloads) (bool, error) {
+	return s.IsUserAvaliable(id)
 }
 func (s *UserStatus) IsUserAvaliable(id string) (bool, error) {
 	result, err := s.StatusService.LoadStatus(id)

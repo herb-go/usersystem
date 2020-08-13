@@ -3,8 +3,8 @@ package userstatus
 import (
 	"testing"
 
-	"github.com/herb-go/usersystem/useravaliable"
-
+	"github.com/herb-go/herbsecurity/authority"
+	"github.com/herb-go/usersystem/userchecksession"
 	"github.com/herb-go/usersystem/userpurge"
 
 	"github.com/herb-go/usersystem/userdataset"
@@ -12,6 +12,36 @@ import (
 	"github.com/herb-go/herb/user/status"
 	"github.com/herb-go/usersystem"
 )
+
+type testSession string
+
+func (s testSession) ID() string {
+	return ""
+}
+func (s testSession) Type() usersystem.SessionType {
+	return ""
+}
+func (s testSession) UID() (string, error) {
+	return string(s), nil
+}
+func (s testSession) Payloads() (*authority.Payloads, error) {
+	return nil, nil
+}
+func (s testSession) Destory() error {
+	return nil
+}
+func (s testSession) Save(key string, v interface{}) error {
+	return nil
+}
+func (s testSession) Load(key string, v interface{}) error {
+	return nil
+}
+func (s testSession) Remove(key string) error {
+	return nil
+}
+func (s testSession) IsNotFoundError(err error) bool {
+	return false
+}
 
 type testService struct {
 	status.Service
@@ -118,15 +148,15 @@ func TestStatus(t *testing.T) {
 	if len(result) != 2 || result["test"] != status.StatusNormal || result["test2"] != status.StatusBanned || result["notexist"] != status.StatusUnkown {
 		t.Fatal(result["test2"])
 	}
-	ok, err = useravaliable.ExecAvaliable(s, "test")
+	ok, err = userchecksession.ExecCheckSession(s, testSession("test"))
 	if !ok || err != nil {
 		t.Fatal(ok, err)
 	}
-	ok, err = useravaliable.ExecAvaliable(s, "test2")
+	ok, err = userchecksession.ExecCheckSession(s, testSession("test2"))
 	if ok || err != nil {
 		t.Fatal(ok, err)
 	}
-	ok, err = useravaliable.ExecAvaliable(s, "notexist")
+	ok, err = userchecksession.ExecCheckSession(s, testSession("notexist"))
 	if ok || err != nil {
 		t.Fatal(ok, err)
 	}
