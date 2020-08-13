@@ -10,7 +10,9 @@ type Session interface {
 	ID() string
 	Type() SessionType
 	UID() (string, error)
+	SaveUID(string) error
 	Payloads() (*authority.Payloads, error)
+	SavePayloads(*authority.Payloads) error
 	Destory() error
 	Save(key string, v interface{}) error
 	Load(key string, v interface{}) error

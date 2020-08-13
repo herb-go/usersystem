@@ -35,9 +35,9 @@ func ExecInitPayloads(s *usersystem.UserSystem, session usersystem.Session) erro
 	ctx := usersystem.SessionContext(s.Context, session)
 	ctx = usersystem.UIDContext(ctx, uid)
 	ctx = context.WithValue(ctx, ContextKeyPayloads, payloads)
-	_, err = s.System.ExecActions(ctx, CommandInitPayloads)
+	ctx, err = s.System.ExecActions(ctx, CommandInitPayloads)
 	if err != nil {
 		return err
 	}
-	return nil
+	return session.SavePayloads(GetPayloads(ctx))
 }

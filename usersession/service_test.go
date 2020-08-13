@@ -21,9 +21,17 @@ func (s testSession) Type() usersystem.SessionType {
 func (s testSession) UID() (string, error) {
 	return string(s), nil
 }
-func (s testSession) Payloads() (*authority.Payloads, error) {
-	return payloads, nil
+func (s testSession) SaveUID(string) error {
+	return nil
 }
+func (s testSession) Payloads() (*authority.Payloads, error) {
+	return authority.NewPayloads(), nil
+}
+func (s testSession) SavePayloads(p *authority.Payloads) error {
+	payloads = p
+	return nil
+}
+
 func (s testSession) Destory() error {
 	return nil
 }
