@@ -4,30 +4,30 @@ import (
 	"sync"
 )
 
-type Datatype string
+type DataType string
 
 type Dataset interface {
-	InitType(datatype Datatype)
-	Set(datatype Datatype, id string, v interface{})
-	Get(datatype Datatype, id string) (interface{}, bool)
-	Delete(datatype Datatype, id string)
+	InitType(datatype DataType)
+	Set(datatype DataType, id string, v interface{})
+	Get(datatype DataType, id string) (interface{}, bool)
+	Delete(datatype DataType, id string)
 	Flush(id string)
 }
 
 type PlainDataset struct {
-	Dataset map[Datatype]*sync.Map
+	Dataset map[DataType]*sync.Map
 }
 
-func (d *PlainDataset) InitType(datatype Datatype) {
+func (d *PlainDataset) InitType(datatype DataType) {
 	d.Dataset[datatype] = &sync.Map{}
 }
-func (d *PlainDataset) Set(datatype Datatype, id string, v interface{}) {
+func (d *PlainDataset) Set(datatype DataType, id string, v interface{}) {
 	d.Dataset[datatype].Store(id, v)
 }
-func (d *PlainDataset) Get(datatype Datatype, id string) (interface{}, bool) {
+func (d *PlainDataset) Get(datatype DataType, id string) (interface{}, bool) {
 	return d.Dataset[datatype].Load(id)
 }
-func (d *PlainDataset) Delete(datatype Datatype, id string) {
+func (d *PlainDataset) Delete(datatype DataType, id string) {
 	d.Dataset[datatype].Delete(id)
 }
 func (d *PlainDataset) Flush(id string) {
@@ -38,6 +38,6 @@ func (d *PlainDataset) Flush(id string) {
 
 func NewPlainDataset() *PlainDataset {
 	return &PlainDataset{
-		Dataset: map[Datatype]*sync.Map{},
+		Dataset: map[DataType]*sync.Map{},
 	}
 }

@@ -22,7 +22,7 @@ func WrapInitDataset(h func(ds usersystem.Dataset) error) *herbsystem.Action {
 	return a
 }
 
-func InitDatasetTypeAction(dt usersystem.Datatype) *herbsystem.Action {
+func InitDatasetTypeAction(dt usersystem.DataType) *herbsystem.Action {
 	return WrapInitDataset(func(ds usersystem.Dataset) error {
 		ds.InitType(dt)
 		return nil

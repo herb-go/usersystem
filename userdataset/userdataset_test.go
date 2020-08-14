@@ -9,7 +9,7 @@ import (
 	"github.com/herb-go/usersystem"
 )
 
-var testDatatype = usersystem.Datatype("test")
+var testDatatype = usersystem.DataType("test")
 
 type testService struct {
 	herbsystem.NopService

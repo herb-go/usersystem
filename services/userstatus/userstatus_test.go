@@ -7,8 +7,6 @@ import (
 	"github.com/herb-go/usersystem/userpurge"
 	"github.com/herb-go/usersystem/usersession"
 
-	"github.com/herb-go/usersystem/userdataset"
-
 	"github.com/herb-go/herb/user/status"
 	"github.com/herb-go/usersystem"
 )
@@ -63,15 +61,8 @@ func (s *testService) Start() error {
 func (s *testService) Stop() error {
 	return nil
 }
-func (s *testService) LoadStatus(idlist ...string) (map[string]status.Status, error) {
-	result := map[string]status.Status{}
-	for _, v := range idlist {
-		st, ok := s.Statuses[v]
-		if ok {
-			result[v] = st
-		}
-	}
-	return result, nil
+func (s *testService) LoadStatus(id string) (status.Status, error) {
+	return s.Statuses[id], nil
 }
 func (s *testService) UpdateStatus(uid string, st status.Status) error {
 	s.Statuses[uid] = st
@@ -85,33 +76,29 @@ func newTestService() *testService {
 	}
 }
 func (t *testService) Purge(uid string) error {
-	delete(t.Statuses, uid)
 	return nil
 }
 
 func TestStatus(t *testing.T) {
+	var err error
 	s := usersystem.New()
 	ss := newTestService()
 	userstatus := MustNewAndInstallTo(s)
-	userstatus.StatusService = ss
+	userstatus.Service = ss
 	s.Ready()
 	s.Configuring()
 	s.Start()
 	defer s.Stop()
-	ds, err := userdataset.ExecNewDataset(s)
+	err = userstatus.UpdateStatus("test", status.StatusNormal)
 	if err != nil {
 		panic(err)
 	}
-	err = userstatus.UpdateStatus(ds, "test", status.StatusBanned)
-	if err != nil {
-		panic(err)
-	}
-	err = userstatus.UpdateStatus(ds, "test2", status.StatusBanned)
+	err = userstatus.UpdateStatus("test2", status.StatusBanned)
 	if err != nil {
 		panic(err)
 	}
 	ok, err := userstatus.IsUserAvaliable("test")
-	if ok || err != nil {
+	if !ok || err != nil {
 		t.Fatal(ok, err)
 	}
 	ok, err = userstatus.IsUserAvaliable("test2")
@@ -122,38 +109,7 @@ func TestStatus(t *testing.T) {
 	if ok || err != nil {
 		t.Fatal(ok, err)
 	}
-	result, err := userstatus.LoadStatus(ds, false, "test", "notexist")
-	if err != nil {
-		panic(err)
-	}
-	if len(result) != 1 || result["test"] != status.StatusBanned {
-		t.Fatal(result)
-	}
-	result, err = userstatus.LoadStatus(ds, false, "test", "test2", "notexist")
-	if err != nil {
-		panic(err)
-	}
-	if len(result) != 2 || result["test"] != status.StatusBanned || result["test2"] != status.StatusBanned || result["notexist"] != status.StatusUnkown {
-		t.Fatal(result["test2"])
-	}
-	err = userstatus.UpdateStatus(nil, "test", status.StatusNormal)
-	if err != nil {
-		t.Fatal(err)
-	}
-	result, err = userstatus.LoadStatus(ds, false, "test", "test2", "notexist")
-	if err != nil {
-		panic(err)
-	}
-	if len(result) != 2 || result["test"] != status.StatusBanned || result["test2"] != status.StatusBanned || result["notexist"] != status.StatusUnkown {
-		t.Fatal(result["test2"])
-	}
-	result, err = userstatus.LoadStatus(ds, true, "test", "test2", "notexist")
-	if err != nil {
-		panic(err)
-	}
-	if len(result) != 2 || result["test"] != status.StatusNormal || result["test2"] != status.StatusBanned || result["notexist"] != status.StatusUnkown {
-		t.Fatal(result["test2"])
-	}
+
 	ok, err = usersession.ExecCheckSession(s, testSession("test"))
 	if !ok || err != nil {
 		t.Fatal(ok, err)
@@ -166,9 +122,8 @@ func TestStatus(t *testing.T) {
 	if ok || err != nil {
 		t.Fatal(ok, err)
 	}
-	userpurge.ExecPurge(s, "test")
-	_, ok = ss.Statuses["test"]
-	if ok {
-		t.Fatal(ss)
+	err = userpurge.ExecPurge(s, "test")
+	if err != nil {
+		panic(err)
 	}
 }
