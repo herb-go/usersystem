@@ -86,5 +86,11 @@ func (s *testService) ServiceActions() []*herbsystem.Action {
 				},
 			}, true, nil
 		}),
+		WrapGetSession(func(st usersystem.SessionType, id string) (usersystem.Session, error) {
+			if st != usersystem.SessionType("test") {
+				return nil, nil
+			}
+			return testSession("got"), nil
+		}),
 	}
 }

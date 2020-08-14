@@ -102,7 +102,7 @@ func (s *UserStatus) UpdateStatus(dataset usersystem.Dataset, id string, st stat
 	return nil
 }
 
-func MustNewUserstatus(s *usersystem.UserSystem) *UserStatus {
+func MustNewAndInstallTo(s *usersystem.UserSystem) *UserStatus {
 	status := New()
 	err := s.InstallService(status)
 	if err != nil {

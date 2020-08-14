@@ -27,10 +27,16 @@ func (s testSession) UID() (string, error) {
 func (s testSession) Payloads() (*authority.Payloads, error) {
 	return nil, nil
 }
+func (s testSession) SavePayloads(*authority.Payloads) error {
+	return nil
+}
 func (s testSession) Destory() error {
 	return nil
 }
 func (s testSession) Save(key string, v interface{}) error {
+	return nil
+}
+func (s testSession) SaveUID(key string) error {
 	return nil
 }
 func (s testSession) Load(key string, v interface{}) error {
@@ -86,7 +92,7 @@ func (t *testService) Purge(uid string) error {
 func TestStatus(t *testing.T) {
 	s := usersystem.New()
 	ss := newTestService()
-	userstatus := MustNewUserstatus(s)
+	userstatus := MustNewAndInstallTo(s)
 	userstatus.StatusService = ss
 	s.Ready()
 	s.Configuring()
