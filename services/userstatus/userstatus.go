@@ -5,6 +5,7 @@ import (
 	"github.com/herb-go/herbsecurity/authority"
 	"github.com/herb-go/herbsystem"
 	"github.com/herb-go/usersystem"
+	"github.com/herb-go/usersystem/usercreate"
 	"github.com/herb-go/usersystem/userpurge"
 	"github.com/herb-go/usersystem/usersession"
 )
@@ -35,11 +36,37 @@ func (s *UserStatus) ServiceActions() []*herbsystem.Action {
 	return []*herbsystem.Action{
 		usersession.WrapCheckSession(s.CheckSession),
 		userpurge.Wrap(s),
+		usercreate.WrapExist(func(id string) (bool, error) {
+			_, err := s.Service.LoadStatus(id)
+			if err != nil {
+				if err == user.ErrUserNotExists {
+					return false, nil
+				}
+				return false, err
+			}
+			return true, nil
+		}),
+		usercreate.WrapCreate(func(id string, next func() error) error {
+			err := s.Service.CreateStatus(id)
+			if err != nil {
+				return err
+			}
+			err = next()
+			if err != nil {
+				s.Service.RemoveStatus(id)
+				return err
+			}
+			return nil
+		}),
+		usercreate.WrapRemove(func(id string) error {
+			return s.Service.RemoveStatus(id)
+		}),
 	}
 }
 func (s *UserStatus) CheckSession(session usersystem.Session, id string, payloads *authority.Payloads) (bool, error) {
 	return s.IsUserAvaliable(id)
 }
+
 func (s *UserStatus) IsUserAvaliable(id string) (bool, error) {
 	st, err := s.Service.LoadStatus(id)
 	if err != nil {

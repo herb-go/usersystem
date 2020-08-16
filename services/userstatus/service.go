@@ -6,6 +6,7 @@ type Service interface {
 	LoadStatus(string) (status.Status, error)
 	UpdateStatus(string, status.Status) error
 	CreateStatus(string) error
+	RemoveStatus(string) error
 	status.Service
 	//Start start service
 	Start() error
