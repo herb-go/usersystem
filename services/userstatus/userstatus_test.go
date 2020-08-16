@@ -4,6 +4,7 @@ import (
 	"testing"
 
 	"github.com/herb-go/herb/user"
+	"github.com/herb-go/herbsystem"
 
 	"github.com/herb-go/herbsecurity/authority"
 	"github.com/herb-go/usersystem/usercreate"
@@ -105,12 +106,27 @@ func (t *testService) Purge(uid string) error {
 	return nil
 }
 
+type testUsersystem struct {
+	herbsystem.NopService
+}
+
+func (t *testUsersystem) ServiceActions() []*herbsystem.Action {
+	return []*herbsystem.Action{
+		usercreate.WrapCreate(func(id string, next func() error) error {
+			if id == "testcreateexsits" {
+				return user.ErrUserExists
+			}
+			return nil
+		}),
+	}
+}
 func TestStatus(t *testing.T) {
 	var err error
 	s := usersystem.New()
 	ss := newTestService()
 	userstatus := MustNewAndInstallTo(s)
 	userstatus.Service = ss
+	s.InstallService(&testUsersystem{})
 	s.Ready()
 	s.Configuring()
 	s.Start()
@@ -185,4 +201,13 @@ func TestStatus(t *testing.T) {
 	if ok || err != nil {
 		t.Fatal()
 	}
+	err = usercreate.ExecCreate(s, "testcreateexsits")
+	if err != user.ErrUserExists {
+		t.Fatal()
+	}
+	ok, err = usercreate.ExecExist(s, "testcreateexsits")
+	if ok || err != nil {
+		t.Fatal()
+	}
+
 }
