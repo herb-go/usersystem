@@ -3,6 +3,8 @@ package userstatus
 import (
 	"testing"
 
+	"github.com/herb-go/herb/user"
+
 	"github.com/herb-go/herbsecurity/authority"
 	"github.com/herb-go/usersystem/userpurge"
 	"github.com/herb-go/usersystem/usersession"
@@ -62,13 +64,28 @@ func (s *testService) Stop() error {
 	return nil
 }
 func (s *testService) LoadStatus(id string) (status.Status, error) {
-	return s.Statuses[id], nil
+	st, ok := s.Statuses[id]
+	if !ok {
+		return status.StatusUnkown, user.ErrUserNotExists
+	}
+	return st, nil
 }
-func (s *testService) UpdateStatus(uid string, st status.Status) error {
-	s.Statuses[uid] = st
+func (s *testService) UpdateStatus(id string, st status.Status) error {
+	_, ok := s.Statuses[id]
+	if !ok {
+		return user.ErrUserNotExists
+	}
+	s.Statuses[id] = st
 	return nil
 }
-
+func (s *testService) CreateStatus(id string) error {
+	_, ok := s.Statuses[id]
+	if ok {
+		return user.ErrUserExists
+	}
+	s.Statuses[id] = status.StatusUnkown
+	return nil
+}
 func newTestService() *testService {
 	return &testService{
 		Service:  status.NormalOrBannedService,
@@ -89,6 +106,14 @@ func TestStatus(t *testing.T) {
 	s.Configuring()
 	s.Start()
 	defer s.Stop()
+	err = userstatus.CreateStatus("test")
+	if err != nil {
+		panic(err)
+	}
+	err = userstatus.CreateStatus("test2")
+	if err != nil {
+		panic(err)
+	}
 	err = userstatus.UpdateStatus("test", status.StatusNormal)
 	if err != nil {
 		panic(err)

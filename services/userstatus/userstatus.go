@@ -1,6 +1,7 @@
 package userstatus
 
 import (
+	"github.com/herb-go/herb/user"
 	"github.com/herb-go/herbsecurity/authority"
 	"github.com/herb-go/herbsystem"
 	"github.com/herb-go/usersystem"
@@ -42,6 +43,9 @@ func (s *UserStatus) CheckSession(session usersystem.Session, id string, payload
 func (s *UserStatus) IsUserAvaliable(id string) (bool, error) {
 	st, err := s.Service.LoadStatus(id)
 	if err != nil {
+		if err == user.ErrUserNotExists {
+			return false, nil
+		}
 		return false, err
 	}
 	return s.Service.IsAvailable(st)
