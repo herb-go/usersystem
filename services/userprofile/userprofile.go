@@ -2,7 +2,6 @@ package userprofile
 
 import (
 	"github.com/herb-go/herb/user/profile"
-	"github.com/herb-go/herb/user/status"
 	"github.com/herb-go/herbsystem"
 	"github.com/herb-go/usersystem"
 	"github.com/herb-go/usersystem/userdataset"
@@ -64,40 +63,62 @@ func (s *UserProfile) ServiceActions() []*herbsystem.Action {
 		userpurge.Wrap(s),
 	}
 }
+func (s *UserProfile) Purge(id string) error {
+	errs := herbsystem.NewErrors()
+	for _, v := range s.Services {
+		errs.Add(v.Purge(id))
+	}
+	return errs.ToError()
 
-func (s *UserProfile) LoadProfile(dataset usersystem.Dataset, passthrough bool, idlist ...string) (map[string]status.Status, error) {
-	result := map[string]status.Status{}
+}
+func (s *UserProfile) loadProfiles(idlist ...string) (map[string]*profile.Profile, error) {
+	var result = map[string]*profile.Profile{}
+	for _, id := range idlist {
+		p := profile.NewProfile()
+		for _, v := range s.Services {
+			fields, err := v.GetProfile(id)
+			if err != nil {
+				return nil, err
+			}
+			p.Chain(fields)
+		}
+		result[id] = p
+	}
+	return result, nil
+}
+func (s *UserProfile) LoadProfile(dataset usersystem.Dataset, passthrough bool, idlist ...string) (map[string]*profile.Profile, error) {
+	result := map[string]*profile.Profile{}
 	unloaded := make([]string, 0, len(idlist))
 	for _, v := range idlist {
 		if !passthrough {
-			st, ok := LoadStatus(dataset, v)
+			p, ok := LoadProfile(dataset, v)
 			if ok {
-				result[v] = st
+				result[v] = p
 				continue
 			}
 
 		}
 		unloaded = append(unloaded, v)
 	}
-	loaded, err := s.Service.LoadStatus(unloaded...)
+	loaded, err := s.loadProfiles(unloaded...)
 	if err != nil {
 		return nil, err
 	}
 	for k := range loaded {
-		SetStatus(dataset, k, loaded[k])
+		SetProfile(dataset, k, loaded[k])
 		result[k] = loaded[k]
 	}
 	return result, nil
 }
 func (s *UserProfile) UpdateProfile(dataset usersystem.Dataset, id string, p *profile.Profile) error {
-	err := s.Service.UpdateProfile(id, st)
-	if err != nil {
-		return err
+	errs := herbsystem.NewErrors()
+	for _, v := range s.Services {
+		errs.Add(v.UpdateProfile(id, p))
 	}
 	if dataset != nil {
-		dataset.Delete(DatatypeStatus, id)
+		dataset.Delete(DatatypeProfile, id)
 	}
-	return nil
+	return errs.ToError()
 }
 
 func MustNewAndInstallTo(s *usersystem.UserSystem) *UserProfile {
