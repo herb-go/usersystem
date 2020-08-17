@@ -1,73 +1,71 @@
-package userstatus
+package userprofile
 
 import (
+	"github.com/herb-go/herb/user/profile"
 	"github.com/herb-go/herb/user/status"
-	"github.com/herb-go/herbsecurity/authority"
 	"github.com/herb-go/herbsystem"
 	"github.com/herb-go/usersystem"
 	"github.com/herb-go/usersystem/userdataset"
 	"github.com/herb-go/usersystem/userpurge"
-	"github.com/herb-go/usersystem/usersession"
 )
 
-var ServiceName = "status"
+var ServiceName = "profile"
 
-var DatatypeStatus = usersystem.DataType("status")
+var DatatypeProfile = usersystem.DataType("profile")
 
-func LoadStatus(ds usersystem.Dataset, id string) (status.Status, bool) {
-	st, ok := ds.Get(DatatypeStatus, id)
+func LoadProfile(ds usersystem.Dataset, id string) (*profile.Profile, bool) {
+	p, ok := ds.Get(DatatypeProfile, id)
 	if !ok {
-		return status.StatusUnkown, false
+		return nil, false
 	}
-	return st.(status.Status), true
+	return p.(*profile.Profile), true
 }
 
-func SetStatus(ds usersystem.Dataset, id string, st status.Status) {
-	ds.Set(DatatypeStatus, id, st)
+func SetProfile(ds usersystem.Dataset, id string, p *profile.Profile) {
+	ds.Set(DatatypeProfile, id, p)
 }
 
-type UserStatus struct {
+type UserProfile struct {
 	herbsystem.NopService
-	Service
+	Services []Service
 }
 
-func New() *UserStatus {
-	return &UserStatus{}
+func New() *UserProfile {
+	return &UserProfile{}
 }
-func (s *UserStatus) InitService() error {
+func (s *UserProfile) ConfigurService() error {
+	s.Services = []Service{}
 	return nil
 }
-func (s *UserStatus) ServiceName() string {
+
+func (s *UserProfile) InitService() error {
+	return nil
+}
+func (s *UserProfile) ServiceName() string {
 	return ServiceName
 }
-func (s *UserStatus) StartService() error {
-	return s.Service.Start()
+func (s *UserProfile) StartService() error {
+	errs := herbsystem.NewErrors()
+	for _, v := range s.Services {
+		errs.Add(v.Start())
+	}
+	return errs.ToError()
 }
-func (s *UserStatus) StopService() error {
-	return s.Service.Stop()
+func (s *UserProfile) StopService() error {
+	errs := herbsystem.NewErrors()
+	for _, v := range s.Services {
+		errs.Add(v.Stop())
+	}
+	return errs.ToError()
 }
-func (s *UserStatus) ServiceActions() []*herbsystem.Action {
+func (s *UserProfile) ServiceActions() []*herbsystem.Action {
 	return []*herbsystem.Action{
-		userdataset.InitDatasetTypeAction(DatatypeStatus),
-		usersession.WrapCheckSession(s.CheckSession),
+		userdataset.InitDatasetTypeAction(DatatypeProfile),
 		userpurge.Wrap(s),
 	}
 }
-func (s *UserStatus) CheckSession(session usersystem.Session, id string, payloads *authority.Payloads) (bool, error) {
-	return s.IsUserAvaliable(id)
-}
-func (s *UserStatus) IsUserAvaliable(id string) (bool, error) {
-	result, err := s.Service.LoadStatus(id)
-	if err != nil {
-		return false, err
-	}
-	st, ok := result[id]
-	if !ok {
-		return false, nil
-	}
-	return s.Service.IsAvailable(st)
-}
-func (s *UserStatus) LoadStatus(dataset usersystem.Dataset, passthrough bool, idlist ...string) (map[string]status.Status, error) {
+
+func (s *UserProfile) LoadProfile(dataset usersystem.Dataset, passthrough bool, idlist ...string) (map[string]status.Status, error) {
 	result := map[string]status.Status{}
 	unloaded := make([]string, 0, len(idlist))
 	for _, v := range idlist {
@@ -91,8 +89,8 @@ func (s *UserStatus) LoadStatus(dataset usersystem.Dataset, passthrough bool, id
 	}
 	return result, nil
 }
-func (s *UserStatus) UpdateStatus(dataset usersystem.Dataset, id string, st status.Status) error {
-	err := s.Service.UpdateStatus(id, st)
+func (s *UserProfile) UpdateProfile(dataset usersystem.Dataset, id string, p *profile.Profile) error {
+	err := s.Service.UpdateProfile(id, st)
 	if err != nil {
 		return err
 	}
@@ -102,11 +100,11 @@ func (s *UserStatus) UpdateStatus(dataset usersystem.Dataset, id string, st stat
 	return nil
 }
 
-func MustNewAndInstallTo(s *usersystem.UserSystem) *UserStatus {
-	status := New()
-	err := s.InstallService(status)
+func MustNewAndInstallTo(s *usersystem.UserSystem) *UserProfile {
+	p := New()
+	err := s.InstallService(p)
 	if err != nil {
 		panic(err)
 	}
-	return status
+	return p
 }
