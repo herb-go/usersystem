@@ -9,9 +9,9 @@ import (
 const SessionKeyPrefix = "."
 
 type RequestSession interface {
-	Set(id string, v interface{}) error
-	Get(id string, v interface{}) error
-	Del(id string) error
+	Set(name string, v interface{}) error
+	Get(name string, v interface{}) error
+	Del(name string) error
 	Destory() error
 	IsNotFoundError()
 }
@@ -69,5 +69,5 @@ func (s *Session) IsNotFoundError(err error) bool {
 
 type HTTPSession struct {
 	herbsystem.NopService
-	Services []Service
+	Services map[usersystem.SessionType]Service
 }
