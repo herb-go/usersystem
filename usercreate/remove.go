@@ -16,7 +16,7 @@ func WrapRemove(h func(string) error) *herbsystem.Action {
 
 		err := h(usersystem.GetUID(ctx))
 		if err != nil {
-			return err
+			return herbsystem.MergeError(next(ctx), err)
 		}
 		return next(ctx)
 	}

@@ -1,12 +1,31 @@
 package usercreate
 
 import (
+	"errors"
 	"testing"
 
 	"github.com/herb-go/herb/user"
 	"github.com/herb-go/herbsystem"
 	"github.com/herb-go/usersystem"
 )
+
+type testService2 struct {
+	herbsystem.NopService
+}
+
+func (s *testService2) ServiceActions() []*herbsystem.Action {
+	return []*herbsystem.Action{
+		WrapRemove(func(id string) error {
+			if id == "removeerror" {
+				return errors.New("removeerror")
+			}
+			return nil
+		}),
+	}
+}
+func (s *testService2) ServiceName() string {
+	return "test2"
+}
 
 type testService struct {
 	herbsystem.NopService
@@ -46,6 +65,7 @@ func TestCreate(t *testing.T) {
 	var err error
 	s := usersystem.New()
 	ss := newTestService()
+	s.InstallService(&testService2{})
 	s.InstallService(ss)
 	s.Ready()
 	s.Configuring()
@@ -74,5 +94,9 @@ func TestCreate(t *testing.T) {
 	ok, err = ExecExist(s, "test")
 	if ok || err != nil {
 		t.Fatal()
+	}
+	err = ExecRemove(s, "removeerror")
+	if err.Error() != "removeerror" {
+		t.Fatal(err)
 	}
 }
