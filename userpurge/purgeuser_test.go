@@ -13,8 +13,8 @@ type testService struct {
 	Cached map[string]string
 }
 
-func (t *testService) Purge(uid string) error {
-	delete(t.Cached, uid)
+func (s *testService) Purge(uid string) error {
+	delete(s.Cached, uid)
 	return nil
 }
 
