@@ -125,10 +125,10 @@ func TestStatus(t *testing.T) {
 	s := usersystem.New()
 	ss := newTestService()
 	userstatus := MustNewAndInstallTo(s)
-	userstatus.Service = ss
 	s.InstallService(&testUsersystem{})
 	s.Ready()
 	s.Configuring()
+	userstatus.Service = ss
 	s.Start()
 	defer s.Stop()
 	err = userstatus.CreateStatus("test")

@@ -68,9 +68,9 @@ func (s testService) Stop() error {
 func TestActiveSessionsManager(t *testing.T) {
 	s := usersystem.New()
 	m := MustNewAndInstallTo(s)
-	m.Service = &testService{}
 	s.Ready()
 	s.Configuring()
+	m.Service = &testService{}
 	s.Start()
 	defer s.Stop()
 	config, err := usersession.ExecActiveSessionManagerConfig(s, "test")

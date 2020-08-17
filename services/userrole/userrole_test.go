@@ -36,9 +36,9 @@ func TestStatus(t *testing.T) {
 	s := usersystem.New()
 	ss := newTestService()
 	userstatus := MustNewAndInstallTo(s)
-	userstatus.Service = ss
 	s.Ready()
 	s.Configuring()
+	userstatus.Service = ss
 	s.Start()
 	defer s.Stop()
 	roles, err := userstatus.Roles("test")

@@ -86,7 +86,7 @@ func (s *UserProfile) loadProfiles(idlist ...string) (map[string]*profile.Profil
 	}
 	return result, nil
 }
-func (s *UserProfile) LoadProfile(dataset usersystem.Dataset, passthrough bool, idlist ...string) (map[string]*profile.Profile, error) {
+func (s *UserProfile) LoadProfiles(dataset usersystem.Dataset, passthrough bool, idlist ...string) (map[string]*profile.Profile, error) {
 	result := map[string]*profile.Profile{}
 	unloaded := make([]string, 0, len(idlist))
 	for _, v := range idlist {
@@ -120,7 +120,9 @@ func (s *UserProfile) UpdateProfile(dataset usersystem.Dataset, id string, p *pr
 	}
 	return errs.ToError()
 }
-
+func (s *UserProfile) AppendService(service Service) {
+	s.Services = append(s.Services, service)
+}
 func MustNewAndInstallTo(s *usersystem.UserSystem) *UserProfile {
 	p := New()
 	err := s.InstallService(p)

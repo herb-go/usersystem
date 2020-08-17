@@ -79,9 +79,9 @@ func TestUserAccount(t *testing.T) {
 	s := usersystem.New()
 	ss := newTestService()
 	useraccount := MustNewAndInstallTo(s)
-	useraccount.Service = ss
 	s.Ready()
 	s.Configuring()
+	useraccount.Service = ss
 	s.Start()
 	defer s.Stop()
 	account, err := user.CaseSensitiveAcountProvider.NewAccount("test", "test")

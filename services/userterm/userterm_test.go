@@ -78,9 +78,9 @@ func TestStatus(t *testing.T) {
 	s := usersystem.New()
 	ss := newTestService()
 	userterm := MustNewAndInstallTo(s)
-	userterm.Service = ss
 	s.Ready()
 	s.Configuring()
+	userterm.Service = ss
 	s.Start()
 	defer s.Stop()
 	session := testSession("test")
