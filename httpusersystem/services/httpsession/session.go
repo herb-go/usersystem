@@ -1,73 +1,61 @@
 package httpsession
 
 import (
-	"github.com/herb-go/herbsecurity/authority"
+	"net/http"
+
 	"github.com/herb-go/herbsystem"
 	"github.com/herb-go/usersystem"
+	"github.com/herb-go/usersystem/usersession"
 )
 
 const SessionKeyPrefix = "."
 
-type RequestSession interface {
-	Set(name string, v interface{}) error
-	Get(name string, v interface{}) error
-	Del(name string) error
-	Destory() error
-	IsNotFoundError()
-}
-type Session struct {
-	id          string
-	sessionType usersystem.SessionType
-	session     RequestSession
-}
+var ServiceName = "httpsession"
 
-func (s *Session) ID() string {
-	return s.id
-}
-func (s *Session) Type() usersystem.SessionType {
-	return s.sessionType
-}
-func (s *Session) UID() (string, error) {
-	id := ""
-	err := s.session.Get("uid", &id)
-	if err != nil {
-		return "", err
-	}
-	return id, nil
-}
-func (s *Session) SaveUID(id string) error {
-	return s.session.Set("uid", id)
-}
-func (s *Session) Payloads() (*authority.Payloads, error) {
-	payload := authority.NewPayloads()
-	err := s.session.Get("payloads", &payload)
-	if err != nil {
-		return nil, err
-	}
-	return payload, nil
-}
-func (s *Session) SavePayloads(payload *authority.Payloads) error {
-	return s.session.Set("payloads", payload)
-
-}
-func (s *Session) Destory() error {
-	return s.Destory()
-}
-func (s *Session) Save(key string, v interface{}) error {
-	return s.session.Set(SessionKeyPrefix+key, v)
-}
-func (s *Session) Load(key string, v interface{}) error {
-	return s.session.Get(SessionKeyPrefix+key, v)
-
-}
-func (s *Session) Remove(key string) error {
-	return s.session.Del(SessionKeyPrefix + key)
-}
-func (s *Session) IsNotFoundError(err error) bool {
-	return s.IsNotFoundError(err)
-}
+var SessionType = usersystem.SessionType("http")
 
 type HTTPSession struct {
 	herbsystem.NopService
-	Services map[usersystem.SessionType]Service
+	Service Service
+	Name    string
+	Type    usersystem.SessionType
+}
+
+func (s *HTTPSession) InitService() error {
+	return nil
+}
+func (s *HTTPSession) ServiceName() string {
+	return s.Name
+}
+func (s *HTTPSession) StartService() error {
+	return s.Service.Start()
+}
+func (s *HTTPSession) StopService() error {
+	return s.Service.Stop()
+}
+func (s *HTTPSession) ServiceActions() []*herbsystem.Action {
+	return []*herbsystem.Action{
+		usersession.WrapGetSession(func(st usersystem.SessionType, id string) (usersystem.Session, error) {
+			if st != s.Type {
+				return nil, nil
+			}
+			return s.Service.GetSession(id, s.Type)
+		}),
+	}
+}
+func (s *HTTPSession) GetRequestSession(r *http.Request) (usersystem.Session, error) {
+	return s.Service.GetRequestSession(r, s.Type)
+}
+func New() *HTTPSession {
+	return &HTTPSession{}
+}
+func MustNewAndInstallTo(s *usersystem.UserSystem) *HTTPSession {
+	session := New()
+	session.Name = ServiceName
+	session.Type = SessionType
+	err := s.InstallService(session)
+	if err != nil {
+		panic(err)
+	}
+	return session
 }

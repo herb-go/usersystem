@@ -7,10 +7,9 @@ import (
 )
 
 type Service interface {
-	SessionType() usersystem.SessionType
-	GetSession(id string) (RequestSession, error)
-	Middleware() func(w http.ResponseWriter, r *http.Request, next http.HandlerFunc)
-	GetRequestSession(r http.Request) (RequestSession, error)
+	GetSession(id string, st usersystem.SessionType) (usersystem.Session, error)
+	SessionMiddleware() func(w http.ResponseWriter, r *http.Request, next http.HandlerFunc)
+	GetRequestSession(r *http.Request, st usersystem.SessionType) (usersystem.Session, error)
 	//Start start service
 	Start() error
 	//Stop stop service
