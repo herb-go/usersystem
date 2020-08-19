@@ -6,8 +6,8 @@ import (
 	"github.com/herb-go/herbsecurity/authority"
 )
 
-var testType = Datatype("test")
-var testType2 = Datatype("test2")
+var testType = DataType("test")
+var testType2 = DataType("test2")
 
 type testSession string
 
@@ -20,11 +20,17 @@ func (s testSession) Type() SessionType {
 func (s testSession) UID() (string, error) {
 	return string(s), nil
 }
+func (s testSession) SaveUID(string) error {
+	return nil
+}
 func (s testSession) Payloads() (*authority.Payloads, error) {
 	return nil, nil
 }
-func (s testSession) Destory() error {
+func (s testSession) SavePayloads(*authority.Payloads) error {
 	return nil
+}
+func (s testSession) Destory() (bool, error) {
+	return false, nil
 }
 func (s testSession) Save(key string, v interface{}) error {
 	return nil

@@ -10,7 +10,10 @@ import (
 	"github.com/herb-go/usersystem/usersession"
 )
 
-type testSession string
+type testSession struct {
+	id       string
+	payloads *authority.Payloads
+}
 
 func (s testSession) ID() string {
 	return ""
@@ -19,20 +22,20 @@ func (s testSession) Type() usersystem.SessionType {
 	return "test"
 }
 func (s testSession) UID() (string, error) {
-	return string(s), nil
+	return s.id, nil
 }
 func (s testSession) SaveUID(string) error {
 	return nil
 }
 func (s testSession) Payloads() (*authority.Payloads, error) {
-	return authority.NewPayloads(), nil
+	return s.payloads, nil
 }
 func (s testSession) SavePayloads(p *authority.Payloads) error {
 	return nil
 }
 
-func (s testSession) Destory() error {
-	return nil
+func (s testSession) Destory() (bool, error) {
+	return false, nil
 }
 func (s testSession) Save(key string, v interface{}) error {
 	return nil
@@ -45,6 +48,12 @@ func (s testSession) Remove(key string) error {
 }
 func (s testSession) IsNotFoundError(err error) bool {
 	return false
+}
+func newTestSession(id string) *testSession {
+	return &testSession{
+		id:       id,
+		payloads: authority.NewPayloads(),
+	}
 }
 
 type testService struct {
@@ -84,12 +93,24 @@ func TestActiveSessionsManager(t *testing.T) {
 	if config == nil || config.Supported == false || config.Duration != time.Minute || err != nil {
 		t.Fatal()
 	}
-	err = usersession.ExecOnSessionActive(s, testSession("123"))
+	err = usersession.ExecOnSessionActive(s, newTestSession("123"))
 	if err != nil {
 		panic(err)
 	}
 	sessions, err := usersession.ExecGetActiveSessions(s, "test")
 	if err != nil || len(sessions) != 1 || sessions[0].SessionID != "12345" {
 		t.Fatal(sessions, err)
+	}
+	session := newTestSession("123")
+	err = usersession.ExecInitPayloads(s, session)
+	if err != nil {
+		panic(err)
+	}
+	sn, err := GetSerialNumber(session)
+	if err != nil {
+		panic(err)
+	}
+	if sn == "" {
+		t.Fatal(sn)
 	}
 }

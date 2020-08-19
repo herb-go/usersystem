@@ -34,8 +34,8 @@ func (s testSession) SavePayloads(p *authority.Payloads) error {
 	return nil
 }
 
-func (s testSession) Destory() error {
-	return nil
+func (s testSession) Destory() (bool, error) {
+	return false, nil
 }
 func (s testSession) Save(key string, v interface{}) error {
 	return nil

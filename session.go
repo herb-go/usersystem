@@ -13,7 +13,7 @@ type Session interface {
 	SaveUID(string) error
 	Payloads() (*authority.Payloads, error)
 	SavePayloads(*authority.Payloads) error
-	Destory() error
+	Destory() (bool, error)
 	Save(key string, v interface{}) error
 	Load(key string, v interface{}) error
 	Remove(key string) error
