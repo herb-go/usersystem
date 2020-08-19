@@ -1,12 +1,22 @@
 package activesessionsmanager
 
 import (
+	"github.com/herb-go/herbsecurity/authority"
 	"github.com/herb-go/herbsystem"
 	"github.com/herb-go/usersystem"
 	"github.com/herb-go/usersystem/usersession"
 )
 
 var ServiceName = "activesessionsmanager"
+var PayloadSerialNumber = "sessionSerialNumber"
+
+func GetSerialNumber(s usersystem.Session) (string, error) {
+	p, err := s.Payloads()
+	if err != nil {
+		return "", err
+	}
+	return p.LoadString(PayloadSerialNumber), nil
+}
 
 type Manager struct {
 	herbsystem.NopService
@@ -39,6 +49,14 @@ func (m *Manager) ServiceActions() []*herbsystem.Action {
 		usersession.WrapOnSessionActive(m.OnSessionActive),
 		usersession.WrapActiveSessionManagerConfig(m.Config),
 		usersession.WrapGetActiveSessions(m.GetActiveSessions),
+		usersession.WrapInitPayloads(func(s usersystem.Session, id string, p *authority.Payloads) error {
+			serialnumber, err := m.Service.CreateSerialNumber()
+			if err != nil {
+				return err
+			}
+			p.Set(PayloadSerialNumber, []byte(serialnumber))
+			return nil
+		}),
 	}
 }
 func New() *Manager {

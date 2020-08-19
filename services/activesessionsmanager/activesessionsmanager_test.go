@@ -1,6 +1,7 @@
 package activesessionsmanager
 
 import (
+	"strconv"
 	"testing"
 	"time"
 
@@ -49,6 +50,12 @@ func (s testSession) IsNotFoundError(err error) bool {
 type testService struct {
 }
 
+var SerialNumber int
+
+func (s testService) CreateSerialNumber() (string, error) {
+	SerialNumber = SerialNumber + 1
+	return strconv.Itoa(SerialNumber), nil
+}
 func (s testService) Config(st usersystem.SessionType) (*usersession.Config, error) {
 	return &usersession.Config{Supported: true, Duration: time.Minute}, nil
 }

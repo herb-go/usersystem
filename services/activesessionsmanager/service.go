@@ -9,6 +9,7 @@ type Service interface {
 	Config(st usersystem.SessionType) (*usersession.Config, error)
 	OnSessionActive(session usersystem.Session, uid string) error
 	GetActiveSessions(usersystem.SessionType) ([]*usersession.ActiveSession, bool, error)
+	CreateSerialNumber() (string, error)
 	Start() error
 	Stop() error
 }
