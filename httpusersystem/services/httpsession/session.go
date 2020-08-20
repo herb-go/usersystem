@@ -16,9 +16,9 @@ var SessionType = usersystem.SessionType("http")
 
 type HTTPSession struct {
 	herbsystem.NopService
-	Service Service
-	Name    string
-	Type    usersystem.SessionType
+	Service
+	Name string
+	Type usersystem.SessionType
 }
 
 func (s *HTTPSession) InitService() error {

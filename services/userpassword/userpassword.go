@@ -43,3 +43,14 @@ func MustNewAndInstallTo(s *usersystem.UserSystem) *UserPassword {
 	}
 	return status
 }
+
+func GetService(s *usersystem.UserSystem) (*UserPassword, error) {
+	v, err := s.GetConfigurableService(ServiceName)
+	if err != nil {
+		return nil, err
+	}
+	if v == nil {
+		return nil, nil
+	}
+	return v.(*UserPassword), nil
+}

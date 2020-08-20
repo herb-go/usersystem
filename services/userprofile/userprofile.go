@@ -131,3 +131,14 @@ func MustNewAndInstallTo(s *usersystem.UserSystem) *UserProfile {
 	}
 	return p
 }
+
+func GetService(s *usersystem.UserSystem) (*UserProfile, error) {
+	v, err := s.GetConfigurableService(ServiceName)
+	if err != nil {
+		return nil, err
+	}
+	if v == nil {
+		return nil, nil
+	}
+	return v.(*UserProfile), nil
+}

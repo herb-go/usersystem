@@ -86,3 +86,14 @@ func MustNewAndInstallTo(s *usersystem.UserSystem) *UserStatus {
 	}
 	return status
 }
+
+func GetService(s *usersystem.UserSystem) (*UserStatus, error) {
+	v, err := s.GetConfigurableService(ServiceName)
+	if err != nil {
+		return nil, err
+	}
+	if v == nil {
+		return nil, nil
+	}
+	return v.(*UserStatus), nil
+}

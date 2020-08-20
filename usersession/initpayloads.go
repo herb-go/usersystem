@@ -41,3 +41,23 @@ func ExecInitPayloads(s *usersystem.UserSystem, session usersystem.Session) erro
 	}
 	return session.SavePayloads(GetPayloads(ctx))
 }
+
+func Login(s *usersystem.UserSystem, session usersystem.Session, uid string) error {
+	err := session.SaveUID(uid)
+	if err != nil {
+		return err
+	}
+	err = session.SavePayloads(authority.NewPayloads())
+	if err != nil {
+		return err
+	}
+	return ExecInitPayloads(s, session)
+}
+
+func Logout(s *usersystem.UserSystem, session usersystem.Session) error {
+	err := session.SaveUID("")
+	if err != nil {
+		return err
+	}
+	return session.SavePayloads(authority.NewPayloads())
+}
