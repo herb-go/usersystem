@@ -86,6 +86,13 @@ func (s *UserProfile) loadProfiles(idlist ...string) (map[string]*profile.Profil
 	}
 	return result, nil
 }
+func (s *UserProfile) LoadProfile(uid string) (*profile.Profile, error) {
+	r, err := s.loadProfiles(uid)
+	if err != nil {
+		return nil, err
+	}
+	return r[uid], nil
+}
 func (s *UserProfile) LoadProfiles(dataset usersystem.Dataset, passthrough bool, idlist ...string) (map[string]*profile.Profile, error) {
 	result := map[string]*profile.Profile{}
 	unloaded := make([]string, 0, len(idlist))
@@ -111,14 +118,14 @@ func (s *UserProfile) LoadProfiles(dataset usersystem.Dataset, passthrough bool,
 	return result, nil
 }
 func (s *UserProfile) UpdateProfile(dataset usersystem.Dataset, id string, p *profile.Profile) error {
-	errs := herbsystem.NewErrors()
+	var err error
 	for _, v := range s.Services {
-		errs.Add(v.UpdateProfile(id, p))
+		err = herbsystem.MergeError(err, v.UpdateProfile(id, p))
 	}
 	if dataset != nil {
 		dataset.Delete(DatatypeProfile, id)
 	}
-	return errs.ToError()
+	return err
 }
 func (s *UserProfile) AppendService(service Service) {
 	s.Services = append(s.Services, service)
