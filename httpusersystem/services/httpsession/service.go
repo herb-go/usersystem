@@ -7,7 +7,7 @@ import (
 )
 
 type Service interface {
-	GetSession(id string, st usersystem.SessionType) (*usersystem.Session, error)
+	usersystem.SessionStore
 	SessionMiddleware() func(w http.ResponseWriter, r *http.Request, next http.HandlerFunc)
 	GetRequestSession(r *http.Request, st usersystem.SessionType) (*usersystem.Session, error)
 	//Start start service

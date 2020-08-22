@@ -61,5 +61,11 @@ func (s *testService) ServiceActions() []*herbsystem.Action {
 			}
 			return testSession("got"), nil
 		}),
+		WrapRevokeSession(func(st usersystem.SessionType, code string) (bool, error) {
+			if st != usersystem.SessionType("test") {
+				return false, nil
+			}
+			return code == "revokecode", nil
+		}),
 	}
 }

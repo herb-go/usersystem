@@ -43,7 +43,7 @@ func (s *HTTPSession) ServiceActions() []*herbsystem.Action {
 			if st != s.Type {
 				return nil, nil
 			}
-			return s.Service.GetSession(id, s.Type)
+			return s.Service.GetSession(s.Type, id)
 		}),
 	}
 }

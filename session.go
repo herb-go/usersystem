@@ -22,12 +22,17 @@ func (s *Session) WithPayloads(p *authority.Payloads) *Session {
 func (s *Session) UID() string {
 	return s.Payloads.LoadString(PayloadUID)
 }
-func (s *Session) ID() string {
-	return s.Payloads.LoadString(PayloadSessionID)
+func (s *Session) RevokeCode() string {
+	return s.Payloads.LoadString(PayloadRevokeCode)
 }
 func NewSession() *Session {
 	return &Session{}
 }
 
 var PayloadUID = "uid"
-var PayloadSessionID = "id"
+var PayloadRevokeCode = "revokecode"
+
+type SessionStore interface {
+	GetSession(sessiontype SessionType, id string) (*Session, error)
+	RevokeSession(sessiontype SessionType, code string) (bool, error)
+}

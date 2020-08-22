@@ -23,13 +23,21 @@ type testService struct {
 	sessions map[string]*usersystem.Session
 }
 
-func (s *testService) GetSession(id string, st usersystem.SessionType) (*usersystem.Session, error) {
+func (s *testService) GetSession(st usersystem.SessionType, id string) (*usersystem.Session, error) {
 	session, ok := s.sessions[id]
 	if !ok {
 		return nil, nil
 	}
 	session.WithType(st)
 	return session, nil
+}
+func (s *testService) RevokeSession(st usersystem.SessionType, code string) (bool, error) {
+	_, ok := s.sessions[code]
+	if !ok {
+		return false, nil
+	}
+	delete(s.sessions, code)
+	return true, nil
 }
 func (s *testService) SessionMiddleware() func(w http.ResponseWriter, r *http.Request, next http.HandlerFunc) {
 	return func(w http.ResponseWriter, r *http.Request, next http.HandlerFunc) {
