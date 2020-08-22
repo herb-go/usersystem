@@ -9,41 +9,10 @@ import (
 	"github.com/herb-go/usersystem"
 )
 
-type testSession string
-
-func (s testSession) ID() string {
-	return ""
-}
-func (s testSession) Type() usersystem.SessionType {
-	return "test"
-}
-func (s testSession) UID() (string, error) {
-	return string(s), nil
-}
-func (s testSession) SaveUID(string) error {
-	return nil
-}
-func (s testSession) Payloads() (*authority.Payloads, error) {
-	return authority.NewPayloads(), nil
-}
-func (s testSession) SavePayloads(p *authority.Payloads) error {
-	return nil
-}
-
-func (s testSession) Destory() (bool, error) {
-	return false, nil
-}
-func (s testSession) Save(key string, v interface{}) error {
-	return nil
-}
-func (s testSession) Load(key string, v interface{}) error {
-	return nil
-}
-func (s testSession) Remove(key string) error {
-	return nil
-}
-func (s testSession) IsNotFoundError(err error) bool {
-	return false
+func testSession(id string) *usersystem.Session {
+	p := authority.NewPayloads()
+	p.Set(usersystem.PayloadUID, []byte(id))
+	return usersystem.NewSession().WithType("test").WithPayloads(p)
 }
 
 type testService struct {
@@ -83,11 +52,11 @@ func TestStatus(t *testing.T) {
 	userterm.Service = ss
 	s.Start()
 	defer s.Stop()
-	session := testSession("test")
-	err = usersession.ExecInitPayloads(s, session)
+	p, err := usersession.ExecInitPayloads(s, s.Context, "test")
 	if err != nil {
 		panic(err)
 	}
+	session := testSession("test").WithPayloads(p)
 	ok, err := usersession.ExecCheckSession(s, session)
 	if !ok || err != nil {
 		t.Fatal()

@@ -9,41 +9,12 @@ import (
 var testType = DataType("test")
 var testType2 = DataType("test2")
 
-type testSession string
+func testSession(id string) *Session {
+	p := authority.NewPayloads()
+	p.Set(PayloadUID, []byte(id))
+	return NewSession().WithType("test").WithPayloads(p)
+}
 
-func (s testSession) ID() string {
-	return ""
-}
-func (s testSession) Type() SessionType {
-	return ""
-}
-func (s testSession) UID() (string, error) {
-	return string(s), nil
-}
-func (s testSession) SaveUID(string) error {
-	return nil
-}
-func (s testSession) Payloads() (*authority.Payloads, error) {
-	return nil, nil
-}
-func (s testSession) SavePayloads(*authority.Payloads) error {
-	return nil
-}
-func (s testSession) Destory() (bool, error) {
-	return false, nil
-}
-func (s testSession) Save(key string, v interface{}) error {
-	return nil
-}
-func (s testSession) Load(key string, v interface{}) error {
-	return nil
-}
-func (s testSession) Remove(key string) error {
-	return nil
-}
-func (s testSession) IsNotFoundError(err error) bool {
-	return false
-}
 func TestUserSystem(t *testing.T) {
 	s := New()
 	if GetUsersystem(s.Context) != s {

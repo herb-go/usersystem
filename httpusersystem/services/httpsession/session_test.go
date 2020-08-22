@@ -13,73 +13,38 @@ import (
 	"github.com/herb-go/usersystem"
 )
 
-type testSession struct {
-	uid         string
-	sessiontype usersystem.SessionType
-}
-
-func (s *testSession) ID() string {
-	return ""
-}
-func (s *testSession) Type() usersystem.SessionType {
-	return s.sessiontype
-}
-func (s *testSession) UID() (string, error) {
-	return s.uid, nil
-}
-func (s *testSession) SaveUID(string) error {
-	return nil
-}
-func (s *testSession) Payloads() (*authority.Payloads, error) {
-	return authority.NewPayloads(), nil
-}
-func (s *testSession) SavePayloads(p *authority.Payloads) error {
-	return nil
-}
-
-func (s *testSession) Destory() (bool, error) {
-	return false, nil
-}
-func (s *testSession) Save(key string, v interface{}) error {
-	return nil
-}
-func (s *testSession) Load(key string, v interface{}) error {
-	return nil
-}
-func (s *testSession) Remove(key string) error {
-	return nil
-}
-func (s *testSession) IsNotFoundError(err error) bool {
-	return false
+func testSession(id string) *usersystem.Session {
+	p := authority.NewPayloads()
+	p.Set(usersystem.PayloadUID, []byte(id))
+	return usersystem.NewSession().WithType("test").WithPayloads(p)
 }
 
 type testService struct {
-	sessions map[string]*testSession
+	sessions map[string]*usersystem.Session
 }
 
-func (s *testService) GetSession(id string, st usersystem.SessionType) (usersystem.Session, error) {
+func (s *testService) GetSession(id string, st usersystem.SessionType) (*usersystem.Session, error) {
 	session, ok := s.sessions[id]
 	if !ok {
 		return nil, nil
 	}
-	session.sessiontype = st
+	session.WithType(st)
 	return session, nil
 }
 func (s *testService) SessionMiddleware() func(w http.ResponseWriter, r *http.Request, next http.HandlerFunc) {
 	return func(w http.ResponseWriter, r *http.Request, next http.HandlerFunc) {
 
-		req := r.WithContext(context.WithValue(r.Context(), "session", &testSession{uid: "requestsession"}))
+		req := r.WithContext(context.WithValue(r.Context(), "session", testSession("requestsession")))
 		*r = *req
 		next(w, r)
 	}
 }
-func (s *testService) GetRequestSession(r *http.Request, st usersystem.SessionType) (usersystem.Session, error) {
+func (s *testService) GetRequestSession(r *http.Request, st usersystem.SessionType) (*usersystem.Session, error) {
 	v := r.Context().Value("session")
-	session, ok := v.(*testSession)
+	session, ok := v.(*usersystem.Session)
 	if !ok {
 		return nil, nil
 	}
-	session.sessiontype = st
 	return session, nil
 }
 func (s *testService) Start() error {
@@ -91,7 +56,7 @@ func (s *testService) Stop() error {
 
 func newTestService() *testService {
 	return &testService{
-		sessions: map[string]*testSession{},
+		sessions: map[string]*usersystem.Session{},
 	}
 }
 func TestHTTPSession(t *testing.T) {
@@ -104,7 +69,7 @@ func TestHTTPSession(t *testing.T) {
 	session.Service = ss
 	s.Start()
 	defer s.Stop()
-	ss.sessions["test"] = &testSession{uid: "test"}
+	ss.sessions["test"] = testSession("test")
 	us, err := usersession.ExecGetSession(s, SessionType, "test")
 	if us == nil || err != nil {
 		t.Fatal()
@@ -127,8 +92,7 @@ func TestHTTPSession(t *testing.T) {
 			if err != nil {
 				panic(err)
 			}
-			uid, err := s.UID()
-			w.Write([]byte(uid))
+			w.Write([]byte(s.UID()))
 			return
 		})
 	}))

@@ -10,50 +10,10 @@ import (
 	"github.com/herb-go/usersystem/usersession"
 )
 
-type testSession struct {
-	id       string
-	payloads *authority.Payloads
-}
-
-func (s testSession) ID() string {
-	return ""
-}
-func (s testSession) Type() usersystem.SessionType {
-	return "test"
-}
-func (s testSession) UID() (string, error) {
-	return s.id, nil
-}
-func (s testSession) SaveUID(string) error {
-	return nil
-}
-func (s testSession) Payloads() (*authority.Payloads, error) {
-	return s.payloads, nil
-}
-func (s testSession) SavePayloads(p *authority.Payloads) error {
-	return nil
-}
-
-func (s testSession) Destory() (bool, error) {
-	return false, nil
-}
-func (s testSession) Save(key string, v interface{}) error {
-	return nil
-}
-func (s testSession) Load(key string, v interface{}) error {
-	return nil
-}
-func (s testSession) Remove(key string) error {
-	return nil
-}
-func (s testSession) IsNotFoundError(err error) bool {
-	return false
-}
-func newTestSession(id string) *testSession {
-	return &testSession{
-		id:       id,
-		payloads: authority.NewPayloads(),
-	}
+func testSession(id string) *usersystem.Session {
+	p := authority.NewPayloads()
+	p.Set(usersystem.PayloadUID, []byte(id))
+	return usersystem.NewSession().WithType("test").WithPayloads(p)
 }
 
 type testService struct {
@@ -68,10 +28,10 @@ func (s testService) CreateSerialNumber() (string, error) {
 func (s testService) Config(st usersystem.SessionType) (*usersession.Config, error) {
 	return &usersession.Config{Supported: true, Duration: time.Minute}, nil
 }
-func (s testService) OnSessionActive(session usersystem.Session, uid string) error {
+func (s testService) OnSessionActive(session *usersystem.Session) error {
 	return nil
 }
-func (s testService) GetActiveSessions(usersystem.SessionType) ([]*usersession.ActiveSession, bool, error) {
+func (s testService) GetActiveSessions(usersystem.SessionType, string) ([]*usersession.ActiveSession, bool, error) {
 	return []*usersession.ActiveSession{&usersession.ActiveSession{SessionID: "12345"}}, true, nil
 }
 func (s testService) Start() error {
@@ -93,19 +53,20 @@ func TestActiveSessionsManager(t *testing.T) {
 	if config == nil || config.Supported == false || config.Duration != time.Minute || err != nil {
 		t.Fatal()
 	}
-	err = usersession.ExecOnSessionActive(s, newTestSession("123"))
+	err = usersession.ExecOnSessionActive(s, testSession("123"))
 	if err != nil {
 		panic(err)
 	}
-	sessions, err := usersession.ExecGetActiveSessions(s, "test")
+	sessions, err := usersession.ExecGetActiveSessions(s, "test", "test")
 	if err != nil || len(sessions) != 1 || sessions[0].SessionID != "12345" {
 		t.Fatal(sessions, err)
 	}
-	session := newTestSession("123")
-	err = usersession.ExecInitPayloads(s, session)
+
+	p, err := usersession.ExecInitPayloads(s, s.Context, "123")
 	if err != nil {
 		panic(err)
 	}
+	session := testSession("123").WithPayloads(p)
 	sn, err := GetSerialNumber(session)
 	if err != nil {
 		panic(err)

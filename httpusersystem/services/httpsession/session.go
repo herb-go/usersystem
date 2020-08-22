@@ -33,18 +33,19 @@ func (s *HTTPSession) StartService() error {
 func (s *HTTPSession) StopService() error {
 	return s.Service.Stop()
 }
+
+func (s *HTTPSession) GetRequestSession(r *http.Request) (*usersystem.Session, error) {
+	return s.Service.GetRequestSession(r, s.Type)
+}
 func (s *HTTPSession) ServiceActions() []*herbsystem.Action {
 	return []*herbsystem.Action{
-		usersession.WrapGetSession(func(st usersystem.SessionType, id string) (usersystem.Session, error) {
+		usersession.WrapGetSession(func(st usersystem.SessionType, id string) (*usersystem.Session, error) {
 			if st != s.Type {
 				return nil, nil
 			}
 			return s.Service.GetSession(id, s.Type)
 		}),
 	}
-}
-func (s *HTTPSession) GetRequestSession(r *http.Request) (usersystem.Session, error) {
-	return s.Service.GetRequestSession(r, s.Type)
 }
 func New() *HTTPSession {
 	return &HTTPSession{}

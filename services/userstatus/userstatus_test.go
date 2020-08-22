@@ -15,40 +15,10 @@ import (
 	"github.com/herb-go/usersystem"
 )
 
-type testSession string
-
-func (s testSession) ID() string {
-	return ""
-}
-func (s testSession) Type() usersystem.SessionType {
-	return ""
-}
-func (s testSession) UID() (string, error) {
-	return string(s), nil
-}
-func (s testSession) Payloads() (*authority.Payloads, error) {
-	return nil, nil
-}
-func (s testSession) SavePayloads(*authority.Payloads) error {
-	return nil
-}
-func (s testSession) Destory() (bool, error) {
-	return false, nil
-}
-func (s testSession) Save(key string, v interface{}) error {
-	return nil
-}
-func (s testSession) SaveUID(key string) error {
-	return nil
-}
-func (s testSession) Load(key string, v interface{}) error {
-	return nil
-}
-func (s testSession) Remove(key string) error {
-	return nil
-}
-func (s testSession) IsNotFoundError(err error) bool {
-	return false
+func testSession(id string) *usersystem.Session {
+	p := authority.NewPayloads()
+	p.Set(usersystem.PayloadUID, []byte(id))
+	return usersystem.NewSession().WithType("test").WithPayloads(p)
 }
 
 type testService struct {

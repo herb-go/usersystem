@@ -18,7 +18,7 @@ func TestGetSession(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	if string(session.(testSession)) != "got" {
+	if session.UID() != "got" {
 		t.Fatal(session)
 	}
 	session, err = ExecGetSession(s, "notexists", "ttt")

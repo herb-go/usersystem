@@ -6,16 +6,28 @@ import (
 
 type SessionType string
 
-type Session interface {
-	ID() string
-	Type() SessionType
-	UID() (string, error)
-	SaveUID(string) error
-	Payloads() (*authority.Payloads, error)
-	SavePayloads(*authority.Payloads) error
-	Destory() (bool, error)
-	Save(key string, v interface{}) error
-	Load(key string, v interface{}) error
-	Remove(key string) error
-	IsNotFoundError(err error) bool
+type Session struct {
+	Type SessionType
+	*authority.Payloads
 }
+
+func (s *Session) WithType(t SessionType) *Session {
+	s.Type = t
+	return s
+}
+func (s *Session) WithPayloads(p *authority.Payloads) *Session {
+	s.Payloads = p
+	return s
+}
+func (s *Session) UID() string {
+	return s.Payloads.LoadString(PayloadUID)
+}
+func (s *Session) ID() string {
+	return s.Payloads.LoadString(PayloadSessionID)
+}
+func NewSession() *Session {
+	return &Session{}
+}
+
+var PayloadUID = "uid"
+var PayloadSessionID = "id"

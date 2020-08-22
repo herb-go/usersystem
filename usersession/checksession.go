@@ -26,11 +26,11 @@ func GetPayloads(ctx context.Context) *authority.Payloads {
 
 var CommandCheckSession = herbsystem.Command("checksession")
 
-func WrapCheckSession(h func(usersystem.Session, string, *authority.Payloads) (bool, error)) *herbsystem.Action {
+func WrapCheckSession(h func(*usersystem.Session) (bool, error)) *herbsystem.Action {
 	a := herbsystem.NewAction()
 	a.Command = CommandCheckSession
 	a.Handler = func(ctx context.Context, next func(context.Context) error) error {
-		result, err := h(usersystem.GetSession(ctx), usersystem.GetUID(ctx), GetPayloads(ctx))
+		result, err := h(usersystem.GetSession(ctx))
 		if err != nil {
 			return err
 		}
@@ -44,18 +44,9 @@ func WrapCheckSession(h func(usersystem.Session, string, *authority.Payloads) (b
 	return a
 }
 
-func ExecCheckSession(s *usersystem.UserSystem, session usersystem.Session) (bool, error) {
-	uid, err := session.UID()
-	if err != nil {
-		return false, err
-	}
-	payloads, err := session.Payloads()
-	if err != nil {
-		return false, err
-	}
+func ExecCheckSession(s *usersystem.UserSystem, session *usersystem.Session) (bool, error) {
+	var err error
 	ctx := usersystem.SessionContext(s.Context, session)
-	ctx = usersystem.UIDContext(ctx, uid)
-	ctx = context.WithValue(ctx, ContextKeyPayloads, payloads)
 	result := &Result{
 		Success: true,
 	}

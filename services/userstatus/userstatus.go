@@ -2,7 +2,6 @@ package userstatus
 
 import (
 	"github.com/herb-go/herb/user"
-	"github.com/herb-go/herbsecurity/authority"
 	"github.com/herb-go/herbsystem"
 	"github.com/herb-go/usersystem"
 	"github.com/herb-go/usersystem/usercreate"
@@ -63,7 +62,11 @@ func (s *UserStatus) ServiceActions() []*herbsystem.Action {
 		}),
 	}
 }
-func (s *UserStatus) CheckSession(session usersystem.Session, id string, payloads *authority.Payloads) (bool, error) {
+func (s *UserStatus) CheckSession(session *usersystem.Session) (bool, error) {
+	id := session.UID()
+	if id == "" {
+		return false, nil
+	}
 	return s.IsUserAvaliable(id)
 }
 

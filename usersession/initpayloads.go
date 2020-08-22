@@ -10,11 +10,11 @@ import (
 
 var CommandInitPayloads = herbsystem.Command("initpayloads")
 
-func WrapInitPayloads(h func(usersystem.Session, string, *authority.Payloads) error) *herbsystem.Action {
+func WrapInitPayloads(h func(context.Context, string, *authority.Payloads) error) *herbsystem.Action {
 	a := herbsystem.NewAction()
 	a.Command = CommandInitPayloads
 	a.Handler = func(ctx context.Context, next func(context.Context) error) error {
-		err := h(usersystem.GetSession(ctx), usersystem.GetUID(ctx), GetPayloads(ctx))
+		err := h(ctx, usersystem.GetUID(ctx), GetPayloads(ctx))
 		if err != nil {
 			return err
 		}
@@ -23,41 +23,15 @@ func WrapInitPayloads(h func(usersystem.Session, string, *authority.Payloads) er
 	return a
 }
 
-func ExecInitPayloads(s *usersystem.UserSystem, session usersystem.Session) error {
-	uid, err := session.UID()
-	if err != nil {
-		return err
-	}
-	payloads, err := session.Payloads()
-	if err != nil {
-		return err
-	}
-	ctx := usersystem.SessionContext(s.Context, session)
+func ExecInitPayloads(s *usersystem.UserSystem, ctx context.Context, uid string) (*authority.Payloads, error) {
+	var err error
+	payloads := authority.NewPayloads()
+	payloads.Set(usersystem.PayloadUID, []byte(uid))
 	ctx = usersystem.UIDContext(ctx, uid)
 	ctx = context.WithValue(ctx, ContextKeyPayloads, payloads)
 	ctx, err = s.System.ExecActions(ctx, CommandInitPayloads)
 	if err != nil {
-		return err
+		return nil, err
 	}
-	return session.SavePayloads(GetPayloads(ctx))
-}
-
-func Login(s *usersystem.UserSystem, session usersystem.Session, uid string) error {
-	err := session.SaveUID(uid)
-	if err != nil {
-		return err
-	}
-	err = session.SavePayloads(authority.NewPayloads())
-	if err != nil {
-		return err
-	}
-	return ExecInitPayloads(s, session)
-}
-
-func Logout(s *usersystem.UserSystem, session usersystem.Session) error {
-	err := session.SaveUID("")
-	if err != nil {
-		return err
-	}
-	return session.SavePayloads(authority.NewPayloads())
+	return GetPayloads(ctx), nil
 }

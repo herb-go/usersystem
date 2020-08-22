@@ -1,6 +1,8 @@
 package userterm
 
 import (
+	"context"
+
 	"github.com/herb-go/herbsecurity/authority"
 	"github.com/herb-go/herbsystem"
 	"github.com/herb-go/usersystem"
@@ -33,7 +35,7 @@ func (s *UserTerm) StartService() error {
 func (s *UserTerm) StopService() error {
 	return s.Service.Stop()
 }
-func (s *UserTerm) InitPayloads(session usersystem.Session, uid string, payloads *authority.Payloads) error {
+func (s *UserTerm) InitPayloads(ctx context.Context, uid string, payloads *authority.Payloads) error {
 	term, err := s.Service.CurrentTerm(uid)
 	if err != nil {
 		return err
@@ -41,12 +43,16 @@ func (s *UserTerm) InitPayloads(session usersystem.Session, uid string, payloads
 	payloads.Set(PayloadTerm, []byte(term))
 	return nil
 }
-func (s *UserTerm) CheckSession(session usersystem.Session, uid string, payloads *authority.Payloads) (bool, error) {
+func (s *UserTerm) CheckSession(session *usersystem.Session) (bool, error) {
+	uid := session.UID()
+	if uid == "" {
+		return false, nil
+	}
 	term, err := s.Service.CurrentTerm(uid)
 	if err != nil {
 		return false, err
 	}
-	sessionterm := payloads.LoadString(PayloadTerm)
+	sessionterm := session.LoadString(PayloadTerm)
 	return term == sessionterm, nil
 }
 func (s *UserTerm) ServiceActions() []*herbsystem.Action {

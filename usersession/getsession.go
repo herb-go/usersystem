@@ -15,7 +15,7 @@ func GetSessionID(ctx context.Context) string {
 
 var CommandGetSession = herbsystem.Command("getsession")
 
-func WrapGetSession(h func(st usersystem.SessionType, id string) (usersystem.Session, error)) *herbsystem.Action {
+func WrapGetSession(h func(st usersystem.SessionType, id string) (*usersystem.Session, error)) *herbsystem.Action {
 	a := herbsystem.NewAction()
 	a.Command = CommandGetSession
 	a.Handler = func(ctx context.Context, next func(context.Context) error) error {
@@ -31,8 +31,8 @@ func WrapGetSession(h func(st usersystem.SessionType, id string) (usersystem.Ses
 	return a
 }
 
-func ExecGetSession(s *usersystem.UserSystem, st usersystem.SessionType, id string) (usersystem.Session, error) {
-	var session usersystem.Session = nil
+func ExecGetSession(s *usersystem.UserSystem, st usersystem.SessionType, id string) (*usersystem.Session, error) {
+	var session *usersystem.Session
 	ctx := usersystem.SessionContext(s.Context, session)
 	ctx = SessionTypeContext(ctx, st)
 	ctx = context.WithValue(ctx, ContextKeySessionID, id)
@@ -44,5 +44,5 @@ func ExecGetSession(s *usersystem.UserSystem, st usersystem.SessionType, id stri
 	if v == nil {
 		return nil, nil
 	}
-	return v.(usersystem.Session), nil
+	return v.(*usersystem.Session), nil
 }

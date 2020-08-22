@@ -14,7 +14,7 @@ func TestGetActiveSessions(t *testing.T) {
 	s.Start()
 	defer s.Stop()
 
-	sessions, err := ExecGetActiveSessions(s, "test")
+	sessions, err := ExecGetActiveSessions(s, "test", "test")
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -24,7 +24,7 @@ func TestGetActiveSessions(t *testing.T) {
 	if sessions[0].SessionID != "active" {
 		t.Fatal(s)
 	}
-	sessions, err = ExecGetActiveSessions(s, "notexists")
+	sessions, err = ExecGetActiveSessions(s, "test", "notexists")
 	if err != nil {
 		t.Fatal(err)
 	}

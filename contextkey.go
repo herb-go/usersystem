@@ -21,10 +21,10 @@ func GetUID(ctx context.Context) string {
 
 var ContextKeySession = ContextKey("session")
 
-func SessionContext(ctx context.Context, session Session) context.Context {
+func SessionContext(ctx context.Context, session *Session) context.Context {
 	return context.WithValue(ctx, ContextKeySession, session)
 }
 
-func GetSession(ctx context.Context) Session {
-	return ctx.Value(ContextKeySession).(Session)
+func GetSession(ctx context.Context) *Session {
+	return ctx.Value(ContextKeySession).(*Session)
 }

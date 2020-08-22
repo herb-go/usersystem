@@ -1,6 +1,8 @@
 package activesessionsmanager
 
 import (
+	"context"
+
 	"github.com/herb-go/herbsecurity/authority"
 	"github.com/herb-go/herbsystem"
 	"github.com/herb-go/usersystem"
@@ -10,12 +12,8 @@ import (
 var ServiceName = "activesessionsmanager"
 var PayloadSerialNumber = "sessionSerialNumber"
 
-func GetSerialNumber(s usersystem.Session) (string, error) {
-	p, err := s.Payloads()
-	if err != nil {
-		return "", err
-	}
-	return p.LoadString(PayloadSerialNumber), nil
+func GetSerialNumber(s *usersystem.Session) (string, error) {
+	return s.Payloads.LoadString(PayloadSerialNumber), nil
 }
 
 type Manager struct {
@@ -38,18 +36,18 @@ func (m *Manager) StopService() error {
 func (m *Manager) Config(st usersystem.SessionType) (*usersession.Config, error) {
 	return m.Service.Config(st)
 }
-func (m *Manager) OnSessionActive(session usersystem.Session, uid string) error {
-	return m.Service.OnSessionActive(session, uid)
+func (m *Manager) OnSessionActive(session *usersystem.Session) error {
+	return m.Service.OnSessionActive(session)
 }
-func (m *Manager) GetActiveSessions(st usersystem.SessionType) ([]*usersession.ActiveSession, bool, error) {
-	return m.Service.GetActiveSessions(st)
+func (m *Manager) GetActiveSessions(st usersystem.SessionType, id string) ([]*usersession.ActiveSession, bool, error) {
+	return m.Service.GetActiveSessions(st, id)
 }
 func (m *Manager) ServiceActions() []*herbsystem.Action {
 	return []*herbsystem.Action{
 		usersession.WrapOnSessionActive(m.OnSessionActive),
 		usersession.WrapActiveSessionManagerConfig(m.Config),
 		usersession.WrapGetActiveSessions(m.GetActiveSessions),
-		usersession.WrapInitPayloads(func(s usersystem.Session, id string, p *authority.Payloads) error {
+		usersession.WrapInitPayloads(func(ctx context.Context, uid string, p *authority.Payloads) error {
 			serialnumber, err := m.Service.CreateSerialNumber()
 			if err != nil {
 				return err
