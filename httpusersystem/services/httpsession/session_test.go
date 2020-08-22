@@ -78,15 +78,30 @@ func TestHTTPSession(t *testing.T) {
 	s.Start()
 	defer s.Stop()
 	ss.sessions["test"] = testSession("test")
-	us, err := usersession.ExecGetSession(s, SessionType, "test")
-	if us == nil || err != nil {
-		t.Fatal()
-	}
-	us, err = usersession.ExecGetSession(s, usersystem.SessionType("notexists"), "test")
+	us, err := usersession.ExecGetSession(s, usersystem.SessionType("notexists"), "test")
 	if us != nil || err != nil {
 		t.Fatal()
 	}
-
+	us, err = usersession.ExecGetSession(s, SessionType, "test")
+	if us == nil || err != nil {
+		t.Fatal()
+	}
+	ok, err := usersession.ExecRevokeSession(s, usersystem.SessionType("notexists"), "test")
+	if ok || err != nil {
+		t.Fatal()
+	}
+	us, err = usersession.ExecGetSession(s, SessionType, "test")
+	if us == nil || err != nil {
+		t.Fatal()
+	}
+	ok, err = usersession.ExecRevokeSession(s, SessionType, "test")
+	if !ok || err != nil {
+		t.Fatal()
+	}
+	us, err = usersession.ExecGetSession(s, SessionType, "test")
+	if us != nil || err != nil {
+		t.Fatal()
+	}
 	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		session.Service.SessionMiddleware()(w, r, func(w http.ResponseWriter, r *http.Request) {
 			s, err := session.GetRequestSession(r)

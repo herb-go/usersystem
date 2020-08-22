@@ -45,6 +45,12 @@ func (s *HTTPSession) ServiceActions() []*herbsystem.Action {
 			}
 			return s.Service.GetSession(s.Type, id)
 		}),
+		usersession.WrapRevokeSession(func(st usersystem.SessionType, code string) (bool, error) {
+			if st != s.Type {
+				return false, nil
+			}
+			return s.Service.RevokeSession(st, code)
+		}),
 	}
 }
 func New() *HTTPSession {
