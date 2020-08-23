@@ -47,7 +47,7 @@ func (m *Manager) ServiceActions() []*herbsystem.Action {
 		usersession.WrapOnSessionActive(m.OnSessionActive),
 		usersession.WrapActiveSessionManagerConfig(m.Config),
 		usersession.WrapGetActiveSessions(m.GetActiveSessions),
-		usersession.WrapInitPayloads(func(ctx context.Context, uid string, p *authority.Payloads) error {
+		usersession.WrapInitPayloads(func(ctx context.Context, st usersystem.SessionType, uid string, p *authority.Payloads) error {
 			serialnumber, err := m.Service.CreateSerialNumber()
 			if err != nil {
 				return err

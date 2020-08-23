@@ -3,7 +3,6 @@ package usersession
 import (
 	"context"
 
-	"github.com/herb-go/herbsecurity/authority"
 	"github.com/herb-go/herbsystem"
 	"github.com/herb-go/usersystem"
 )
@@ -16,12 +15,6 @@ var ContextKeyCheckSessionResult = usersystem.ContextKey("usersession.result")
 
 func GetResult(ctx context.Context) *Result {
 	return ctx.Value(ContextKeyCheckSessionResult).(*Result)
-}
-
-var ContextKeyPayloads = usersystem.ContextKey("usersession.payloads")
-
-func GetPayloads(ctx context.Context) *authority.Payloads {
-	return ctx.Value(ContextKeyPayloads).(*authority.Payloads)
 }
 
 var CommandCheckSession = herbsystem.Command("checksession")

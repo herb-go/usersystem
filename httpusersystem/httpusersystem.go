@@ -14,5 +14,10 @@ func RequestContext(ctx context.Context, req *http.Request) context.Context {
 }
 
 func GetRequest(ctx context.Context) *http.Request {
-	return ctx.Value(ContextKeyRequest).(*http.Request)
+	v := ctx.Value(ContextKeyRequest)
+	r, ok := v.(*http.Request)
+	if !ok {
+		return nil
+	}
+	return r
 }

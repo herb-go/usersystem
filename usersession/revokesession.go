@@ -19,7 +19,7 @@ func WrapRevokeSession(h func(st usersystem.SessionType, code string) (bool, err
 	a := herbsystem.NewAction()
 	a.Command = CommandRevokeSession
 	a.Handler = func(ctx context.Context, next func(context.Context) error) error {
-		ok, err := h(GetSessionType(ctx), GetSessionRevokeCode(ctx))
+		ok, err := h(usersystem.GetSessionType(ctx), GetSessionRevokeCode(ctx))
 		if err != nil {
 			return err
 		}
@@ -37,7 +37,7 @@ func ExecRevokeSession(s *usersystem.UserSystem, st usersystem.SessionType, code
 	if code == "" {
 		return false, nil
 	}
-	ctx := SessionTypeContext(s.Context, st)
+	ctx := usersystem.SessionTypeContext(s.Context, st)
 
 	ctx = context.WithValue(ctx, ContextSessionRevokeCode, code)
 	result := &Result{

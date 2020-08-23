@@ -1,6 +1,10 @@
 package usersystem
 
-import "context"
+import (
+	"context"
+
+	"github.com/herb-go/herbsecurity/authority"
+)
 
 type ContextKey string
 
@@ -27,4 +31,23 @@ func SessionContext(ctx context.Context, session *Session) context.Context {
 
 func GetSession(ctx context.Context) *Session {
 	return ctx.Value(ContextKeySession).(*Session)
+}
+
+var ContextKeySessionType = ContextKey("sessiontype")
+
+func SessionTypeContext(ctx context.Context, st SessionType) context.Context {
+	return context.WithValue(ctx, ContextKeySessionType, st)
+}
+func GetSessionType(ctx context.Context) SessionType {
+	return ctx.Value(ContextKeySessionType).(SessionType)
+}
+
+var ContextKeyPayloads = ContextKey("usersession.payloads")
+
+func PayloadsContext(ctx context.Context, payloads *authority.Payloads) context.Context {
+	return context.WithValue(ctx, ContextKeyPayloads, payloads)
+}
+
+func GetPayloads(ctx context.Context) *authority.Payloads {
+	return ctx.Value(ContextKeyPayloads).(*authority.Payloads)
 }

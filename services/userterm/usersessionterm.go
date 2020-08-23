@@ -35,7 +35,7 @@ func (s *UserTerm) StartService() error {
 func (s *UserTerm) StopService() error {
 	return s.Service.Stop()
 }
-func (s *UserTerm) InitPayloads(ctx context.Context, uid string, payloads *authority.Payloads) error {
+func (s *UserTerm) InitPayloads(ctx context.Context, st usersystem.SessionType, uid string, payloads *authority.Payloads) error {
 	term, err := s.Service.CurrentTerm(uid)
 	if err != nil {
 		return err

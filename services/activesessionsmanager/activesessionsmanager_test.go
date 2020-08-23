@@ -62,7 +62,7 @@ func TestActiveSessionsManager(t *testing.T) {
 		t.Fatal(sessions, err)
 	}
 
-	p, err := usersession.ExecInitPayloads(s, s.Context, "123")
+	p, err := usersession.ExecInitPayloads(s, s.Context, "test", "123")
 	if err != nil {
 		panic(err)
 	}

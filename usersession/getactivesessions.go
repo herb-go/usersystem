@@ -29,7 +29,7 @@ func WrapGetActiveSessions(h func(usersystem.SessionType, string) ([]*ActiveSess
 	a := herbsystem.NewAction()
 	a.Command = CommandGetActiveSessions
 	a.Handler = func(ctx context.Context, next func(context.Context) error) error {
-		sessions, ok, err := h(GetSessionType(ctx), usersystem.GetUID(ctx))
+		sessions, ok, err := h(usersystem.GetSessionType(ctx), usersystem.GetUID(ctx))
 		if err != nil {
 			return err
 		}
@@ -42,7 +42,7 @@ func WrapGetActiveSessions(h func(usersystem.SessionType, string) ([]*ActiveSess
 }
 
 func ExecGetActiveSessions(s *usersystem.UserSystem, st usersystem.SessionType, uid string) ([]*ActiveSession, error) {
-	ctx := SessionTypeContext(s.Context, st)
+	ctx := usersystem.SessionTypeContext(s.Context, st)
 	ctx = context.WithValue(ctx, ContextKeyActiveSessions, nil)
 	ctx = usersystem.UIDContext(ctx, uid)
 	ctx, err := s.System.ExecActions(ctx, CommandGetActiveSessions)

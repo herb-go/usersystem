@@ -28,7 +28,7 @@ func (s *testService) ServiceActions() []*herbsystem.Action {
 		WrapCheckSession(func(session *usersystem.Session) (bool, error) {
 			return session.UID() == "exists", nil
 		}),
-		WrapInitPayloads(func(ctx context.Context, id string, payloads *authority.Payloads) error {
+		WrapInitPayloads(func(ctx context.Context, st usersystem.SessionType, id string, payloads *authority.Payloads) error {
 			payloads.Set("test", []byte("testvalue"))
 			return nil
 		}),

@@ -13,7 +13,7 @@ func TestInitPayloads(t *testing.T) {
 	s.Configuring()
 	s.Start()
 	defer s.Stop()
-	payloads, err := ExecInitPayloads(s, s.Context, "exists")
+	payloads, err := ExecInitPayloads(s, s.Context, "test", "exists")
 	if err != nil {
 		t.Fatal(err)
 	}
