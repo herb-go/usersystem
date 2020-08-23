@@ -7,10 +7,15 @@ import (
 type SessionType string
 
 type Session struct {
+	ID   string
 	Type SessionType
 	*authority.Payloads
 }
 
+func (s *Session) WithID(id string) *Session {
+	s.ID = id
+	return s
+}
 func (s *Session) WithType(t SessionType) *Session {
 	s.Type = t
 	return s

@@ -3,8 +3,6 @@ package httpsession
 import (
 	"net/http"
 
-	"github.com/herb-go/herbsecurity/authority"
-
 	"github.com/herb-go/herbsystem"
 	"github.com/herb-go/usersystem"
 	"github.com/herb-go/usersystem/usersession"
@@ -57,18 +55,12 @@ func (s *HTTPSession) ServiceActions() []*herbsystem.Action {
 			}
 			return s.Service.RevokeSession(st, code)
 		}),
-		WrapLogin(func(st usersystem.SessionType, r *http.Request, p *authority.Payloads) error {
-			if st != s.Type {
-				return nil
-			}
-			return s.Service.LoginRequestSession(r, p)
-		}),
 	}
 }
 func New() *HTTPSession {
 	return &HTTPSession{}
 }
-func MustNewAndInstallTo(s *usersystem.UserSystem) *HTTPSession {
+func MustNewAndInstallTo(s *usersystem.UserSystem) *InstalledHTTPSession {
 	session := New()
 	session.Name = ServiceName
 	session.Type = SessionType
@@ -77,5 +69,8 @@ func MustNewAndInstallTo(s *usersystem.UserSystem) *HTTPSession {
 	if err != nil {
 		panic(err)
 	}
-	return session
+	i := NewInstalledHTTPSession()
+	i.HTTPSession = session
+	i.UserSystem = s
+	return i
 }

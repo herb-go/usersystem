@@ -11,7 +11,7 @@ type Service interface {
 	usersystem.SessionStore
 	SessionMiddleware() func(w http.ResponseWriter, r *http.Request, next http.HandlerFunc)
 	GetRequestSession(r *http.Request, st usersystem.SessionType) (*usersystem.Session, error)
-	LoginRequestSession(r *http.Request, payloads *authority.Payloads) error
+	LoginRequestSession(r *http.Request, payloads *authority.Payloads) (*usersystem.Session, error)
 	LogoutRequestSession(r *http.Request) (bool, error)
 	//Start start service
 	Start() error
