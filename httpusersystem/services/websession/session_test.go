@@ -1,7 +1,9 @@
-package httpsession
+package websession
 
 import (
 	"context"
+	"encoding/json"
+	"errors"
 	"io/ioutil"
 	"net/http"
 	"net/http/httptest"
@@ -13,6 +15,8 @@ import (
 	"github.com/herb-go/usersystem"
 )
 
+var testErrNotFound = errors.New("not found")
+
 func testSession(id string) *usersystem.Session {
 	p := authority.NewPayloads()
 	p.Set(usersystem.PayloadUID, []byte(id))
@@ -21,6 +25,7 @@ func testSession(id string) *usersystem.Session {
 
 type testService struct {
 	sessions map[string]*usersystem.Session
+	values   map[string][]byte
 }
 
 func (s *testService) GetSession(st usersystem.SessionType, id string) (*usersystem.Session, error) {
@@ -65,7 +70,34 @@ func (s *testService) LogoutRequestSession(r *http.Request) (bool, error) {
 	*r = *req
 	return true, nil
 }
+func (s *testService) Set(r *http.Request, fieldname string, v interface{}) error {
+	bs, err := json.Marshal(v)
+	if err != nil {
+		return err
+	}
+	s.values[fieldname] = bs
+	return nil
+}
 
+//Get get session by field name with given value.
+func (s *testService) Get(r *http.Request, fieldname string, v interface{}) error {
+	bs, ok := s.values[fieldname]
+	if !ok {
+		return testErrNotFound
+	}
+	return json.Unmarshal(bs, v)
+}
+
+// Del del session value by field name .
+func (s *testService) Del(r *http.Request, fieldname string) error {
+	delete(s.values, fieldname)
+	return nil
+}
+
+// IsNotFoundError check if given error is session not found error.
+func (s *testService) IsNotFoundError(err error) bool {
+	return err == testErrNotFound
+}
 func (s *testService) Start() error {
 	return nil
 }
@@ -76,6 +108,7 @@ func (s *testService) Stop() error {
 func newTestService() *testService {
 	return &testService{
 		sessions: map[string]*usersystem.Session{},
+		values:   map[string][]byte{},
 	}
 }
 func TestHTTPSession(t *testing.T) {
@@ -171,5 +204,29 @@ func TestHTTPSession(t *testing.T) {
 	}
 	if us2 != nil {
 		t.Fatal(us2)
+	}
+	var result = ""
+	err = session.Get(req, "test", &result)
+	if err == nil || !session.IsNotFoundError(err) {
+		t.Fatal()
+	}
+	err = session.Set(req, "test", "testvalue")
+	if err != nil {
+		t.Fatal()
+	}
+	err = session.Get(req, "test", &result)
+	if err != nil {
+		t.Fatal()
+	}
+	if result != "testvalue" {
+		t.Fatal(result)
+	}
+	err = session.Del(req, "test")
+	if err != nil {
+		t.Fatal()
+	}
+	err = session.Get(req, "test", &result)
+	if err == nil || !session.IsNotFoundError(err) {
+		t.Fatal()
 	}
 }

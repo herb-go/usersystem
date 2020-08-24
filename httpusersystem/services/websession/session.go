@@ -1,4 +1,4 @@
-package httpsession
+package websession
 
 import (
 	"net/http"
@@ -10,11 +10,11 @@ import (
 
 const SessionKeyPrefix = "."
 
-var ServiceName = "httpsession"
+var ServiceName = "cookiesession"
 
 var SessionType = usersystem.SessionType("http")
 
-type HTTPSession struct {
+type WebSession struct {
 	herbsystem.NopService
 	Service
 	Name       string
@@ -22,26 +22,26 @@ type HTTPSession struct {
 	Type       usersystem.SessionType
 }
 
-func (s *HTTPSession) InitService() error {
+func (s *WebSession) InitService() error {
 	return nil
 }
-func (s *HTTPSession) ServiceName() string {
+func (s *WebSession) ServiceName() string {
 	return s.Name
 }
-func (s *HTTPSession) StartService() error {
+func (s *WebSession) StartService() error {
 	return s.Service.Start()
 }
-func (s *HTTPSession) StopService() error {
+func (s *WebSession) StopService() error {
 	return s.Service.Stop()
 }
 
-func (s *HTTPSession) GetRequestSession(r *http.Request) (*usersystem.Session, error) {
+func (s *WebSession) GetRequestSession(r *http.Request) (*usersystem.Session, error) {
 	return s.Service.GetRequestSession(r, s.Type)
 }
-func (s *HTTPSession) Logout(r *http.Request) (bool, error) {
+func (s *WebSession) Logout(r *http.Request) (bool, error) {
 	return s.Service.LogoutRequestSession(r)
 }
-func (s *HTTPSession) ServiceActions() []*herbsystem.Action {
+func (s *WebSession) ServiceActions() []*herbsystem.Action {
 	return []*herbsystem.Action{
 		usersession.WrapGetSession(func(st usersystem.SessionType, id string) (*usersystem.Session, error) {
 			if st != s.Type {
@@ -57,10 +57,10 @@ func (s *HTTPSession) ServiceActions() []*herbsystem.Action {
 		}),
 	}
 }
-func New() *HTTPSession {
-	return &HTTPSession{}
+func New() *WebSession {
+	return &WebSession{}
 }
-func MustNewAndInstallTo(s *usersystem.UserSystem) *InstalledHTTPSession {
+func MustNewAndInstallTo(s *usersystem.UserSystem) *InstalledWebSession {
 	session := New()
 	session.Name = ServiceName
 	session.Type = SessionType
@@ -69,8 +69,23 @@ func MustNewAndInstallTo(s *usersystem.UserSystem) *InstalledHTTPSession {
 	if err != nil {
 		panic(err)
 	}
-	i := NewInstalledHTTPSession()
-	i.HTTPSession = session
+	i := NewInstalledWebSession()
+	i.WebSession = session
 	i.UserSystem = s
 	return i
+}
+
+func GetService(s *usersystem.UserSystem) (*WebSession, error) {
+	return GetServiceByName(s, ServiceName)
+}
+
+func GetServiceByName(s *usersystem.UserSystem, servicename string) (*WebSession, error) {
+	v, err := s.GetConfigurableService(servicename)
+	if err != nil {
+		return nil, err
+	}
+	if v == nil {
+		return nil, nil
+	}
+	return v.(*WebSession), nil
 }

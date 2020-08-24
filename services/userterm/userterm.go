@@ -52,7 +52,7 @@ func (s *UserTerm) CheckSession(session *usersystem.Session) (bool, error) {
 	if err != nil {
 		return false, err
 	}
-	sessionterm := session.LoadString(PayloadTerm)
+	sessionterm := session.Payloads.LoadString(PayloadTerm)
 	return term == sessionterm, nil
 }
 func (s *UserTerm) ServiceActions() []*herbsystem.Action {
@@ -63,13 +63,16 @@ func (s *UserTerm) ServiceActions() []*herbsystem.Action {
 	}
 }
 
-func MustNewAndInstallTo(s *usersystem.UserSystem) *UserTerm {
-	status := New()
-	err := s.InstallService(status)
+func MustNewAndInstallTo(s *usersystem.UserSystem) *InstalledUserTerm {
+	term := New()
+	err := s.InstallService(term)
 	if err != nil {
 		panic(err)
 	}
-	return status
+	i := NewInstalledUserTerm()
+	i.UserTerm = term
+	i.UserSystem = s
+	return i
 }
 
 func GetService(s *usersystem.UserSystem) (*UserTerm, error) {

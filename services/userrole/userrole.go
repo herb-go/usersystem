@@ -35,13 +35,16 @@ func (s *UserRole) ServiceActions() []*herbsystem.Action {
 	}
 }
 
-func MustNewAndInstallTo(s *usersystem.UserSystem) *UserRole {
+func MustNewAndInstallTo(s *usersystem.UserSystem) *InstalledUserRole {
 	role := New()
 	err := s.InstallService(role)
 	if err != nil {
 		panic(err)
 	}
-	return role
+	i := NewInstalledUserRole()
+	i.UserRole = role
+	i.UserSystem = s
+	return i
 }
 
 func GetService(s *usersystem.UserSystem) (*UserRole, error) {

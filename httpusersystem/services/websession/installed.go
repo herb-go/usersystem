@@ -1,4 +1,4 @@
-package httpsession
+package websession
 
 import (
 	"net/http"
@@ -9,16 +9,16 @@ import (
 	"github.com/herb-go/usersystem"
 )
 
-type InstalledHTTPSession struct {
-	*HTTPSession
+type InstalledWebSession struct {
+	*WebSession
 	UserSystem *usersystem.UserSystem
 }
 
-func NewInstalledHTTPSession() *InstalledHTTPSession {
-	return &InstalledHTTPSession{}
+func NewInstalledWebSession() *InstalledWebSession {
+	return &InstalledWebSession{}
 }
 
-func (s *InstalledHTTPSession) Middleware() func(w http.ResponseWriter, r *http.Request, next http.HandlerFunc) {
+func (s *InstalledWebSession) Middleware() func(w http.ResponseWriter, r *http.Request, next http.HandlerFunc) {
 	return func(w http.ResponseWriter, r *http.Request, next http.HandlerFunc) {
 		s.Service.SessionMiddleware()(w, r, func(w http.ResponseWriter, r *http.Request) {
 			session, err := s.GetRequestSession(r)
@@ -34,7 +34,7 @@ func (s *InstalledHTTPSession) Middleware() func(w http.ResponseWriter, r *http.
 	}
 }
 
-func (s *InstalledHTTPSession) Login(r *http.Request, uid string) (*usersystem.Session, error) {
+func (s *InstalledWebSession) Login(r *http.Request, uid string) (*usersystem.Session, error) {
 	ctx := httpusersystem.RequestContext(s.UserSystem.Context, r)
 	p, err := usersession.ExecInitPayloads(s.UserSystem, ctx, s.Type, uid)
 	if err != nil {

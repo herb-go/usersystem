@@ -52,7 +52,7 @@ func TestStatus(t *testing.T) {
 	userterm.Service = ss
 	s.Start()
 	defer s.Stop()
-	p, err := usersession.ExecInitPayloads(s, s.Context, "test")
+	p, err := usersession.ExecInitPayloads(s, s.Context, "test", "test")
 	if err != nil {
 		panic(err)
 	}

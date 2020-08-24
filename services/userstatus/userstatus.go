@@ -81,13 +81,16 @@ func (s *UserStatus) IsUserAvaliable(id string) (bool, error) {
 	return s.Service.IsAvailable(st)
 }
 
-func MustNewAndInstallTo(s *usersystem.UserSystem) *UserStatus {
+func MustNewAndInstallTo(s *usersystem.UserSystem) *InstalledUserStatus {
 	status := New()
 	err := s.InstallService(status)
 	if err != nil {
 		panic(err)
 	}
-	return status
+	i := NewInstalledUserStatus()
+	i.UserStatus = status
+	i.UserSystem = s
+	return i
 }
 
 func GetService(s *usersystem.UserSystem) (*UserStatus, error) {

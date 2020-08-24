@@ -1,4 +1,4 @@
-package activesessionsmanager
+package activesessions
 
 import (
 	"strconv"
@@ -21,23 +21,26 @@ type testService struct {
 
 var SerialNumber int
 
-func (s testService) CreateSerialNumber() (string, error) {
+func (s *testService) CreateSerialNumber() (string, error) {
 	SerialNumber = SerialNumber + 1
 	return strconv.Itoa(SerialNumber), nil
 }
-func (s testService) Config(st usersystem.SessionType) (*usersession.Config, error) {
-	return &usersession.Config{Supported: true, Duration: time.Minute}, nil
+func (s *testService) Config(st usersystem.SessionType) (*Config, error) {
+	return &Config{Supported: true, Duration: time.Minute}, nil
 }
-func (s testService) OnSessionActive(session *usersystem.Session) error {
+func (s *testService) OnSessionActive(session *usersystem.Session) error {
 	return nil
 }
-func (s testService) GetActiveSessions(usersystem.SessionType, string) ([]*usersession.ActiveSession, bool, error) {
-	return []*usersession.ActiveSession{&usersession.ActiveSession{SessionID: "12345"}}, true, nil
+func (s *testService) GetActiveSessions(usersystem.SessionType, string) ([]*Active, error) {
+	return []*Active{&Active{SessionID: "12345"}}, nil
 }
-func (s testService) Start() error {
+func (s *testService) PurgeActiveSession(st usersystem.SessionType, uid string, serialnumber string) error {
 	return nil
 }
-func (s testService) Stop() error {
+func (s *testService) Start() error {
+	return nil
+}
+func (s *testService) Stop() error {
 	return nil
 }
 
@@ -49,7 +52,7 @@ func TestActiveSessionsManager(t *testing.T) {
 	m.Service = &testService{}
 	s.Start()
 	defer s.Stop()
-	config, err := usersession.ExecActiveSessionManagerConfig(s, "test")
+	config, err := m.Config("test")
 	if config == nil || config.Supported == false || config.Duration != time.Minute || err != nil {
 		t.Fatal()
 	}
@@ -57,7 +60,7 @@ func TestActiveSessionsManager(t *testing.T) {
 	if err != nil {
 		panic(err)
 	}
-	sessions, err := usersession.ExecGetActiveSessions(s, "test", "test")
+	sessions, err := m.GetActiveSessions("test", "test")
 	if err != nil || len(sessions) != 1 || sessions[0].SessionID != "12345" {
 		t.Fatal(sessions, err)
 	}
@@ -73,5 +76,9 @@ func TestActiveSessionsManager(t *testing.T) {
 	}
 	if sn == "" {
 		t.Fatal(sn)
+	}
+	err = m.PurgeActiveSession("test", "test", "123455")
+	if err != nil {
+		panic(err)
 	}
 }

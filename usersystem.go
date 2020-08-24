@@ -12,6 +12,11 @@ type UserSystem struct {
 	*herbsystem.System
 }
 
+func (u *UserSystem) WithKeyword(k Keyword) *UserSystem {
+	u.Keyword = k
+	return u
+}
+
 func New() *UserSystem {
 	s := &UserSystem{
 		System: herbsystem.NewSystem(),

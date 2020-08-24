@@ -130,13 +130,16 @@ func (s *UserProfile) UpdateProfile(dataset usersystem.Dataset, id string, p *pr
 func (s *UserProfile) AppendService(service Service) {
 	s.Services = append(s.Services, service)
 }
-func MustNewAndInstallTo(s *usersystem.UserSystem) *UserProfile {
+func MustNewAndInstallTo(s *usersystem.UserSystem) *InstalledUserProfile {
 	p := New()
 	err := s.InstallService(p)
 	if err != nil {
 		panic(err)
 	}
-	return p
+	i := NewInstalledUserProfile()
+	i.UserProfile = p
+	i.UserSystem = s
+	return i
 }
 
 func GetService(s *usersystem.UserSystem) (*UserProfile, error) {

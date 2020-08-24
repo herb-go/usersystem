@@ -2,7 +2,6 @@ package usersession
 
 import (
 	"context"
-	"time"
 
 	"github.com/herb-go/herbsecurity/authority"
 	"github.com/herb-go/herbsystem"
@@ -35,25 +34,6 @@ func (s *testService) ServiceActions() []*herbsystem.Action {
 		WrapOnSessionActive(func(session *usersystem.Session) error {
 			lastactive = session.UID()
 			return nil
-		}),
-		WrapActiveSessionManagerConfig(func(st usersystem.SessionType) (*Config, error) {
-			if st != usersystem.SessionType("test") {
-				return nil, nil
-			}
-			return &Config{
-				Supported: true,
-				Duration:  time.Minute,
-			}, nil
-		}),
-		WrapGetActiveSessions(func(st usersystem.SessionType, uid string) ([]*ActiveSession, bool, error) {
-			if st != usersystem.SessionType("test") || uid != "test" {
-				return nil, false, nil
-			}
-			return []*ActiveSession{
-				&ActiveSession{
-					SessionID: "active",
-				},
-			}, true, nil
 		}),
 		WrapGetSession(func(st usersystem.SessionType, id string) (*usersystem.Session, error) {
 			if st != usersystem.SessionType("test") {
