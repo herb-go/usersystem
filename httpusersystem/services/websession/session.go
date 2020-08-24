@@ -10,9 +10,9 @@ import (
 
 const SessionKeyPrefix = "."
 
-var ServiceName = "cookiesession"
+var ServiceName = "websession"
 
-var SessionType = usersystem.SessionType("http")
+var SessionType = usersystem.SessionType("web")
 
 type WebSession struct {
 	herbsystem.NopService
