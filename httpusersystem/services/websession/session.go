@@ -41,6 +41,14 @@ func (s *WebSession) GetRequestSession(r *http.Request) (*usersystem.Session, er
 func (s *WebSession) Logout(r *http.Request) (bool, error) {
 	return s.Service.LogoutRequestSession(r)
 }
+
+func (s *WebSession) LogoutMiddleware(w http.ResponseWriter, r *http.Request, next http.HandlerFunc) {
+	_, err := s.Logout(r)
+	if err != nil {
+		panic(err)
+	}
+	next(w, r)
+}
 func (s *WebSession) ServiceActions() []*herbsystem.Action {
 	return []*herbsystem.Action{
 		usersession.WrapGetSession(func(st usersystem.SessionType, id string) (*usersystem.Session, error) {
@@ -56,6 +64,16 @@ func (s *WebSession) ServiceActions() []*herbsystem.Action {
 			return s.Service.RevokeSession(st, code)
 		}),
 	}
+}
+func (s *WebSession) IdentifyRequest(r *http.Request) (uid string, err error) {
+	session, err := s.GetRequestSession(r)
+	if err != nil {
+		return "", err
+	}
+	if session == nil {
+		return "", nil
+	}
+	return session.UID(), nil
 }
 func New() *WebSession {
 	return &WebSession{}
