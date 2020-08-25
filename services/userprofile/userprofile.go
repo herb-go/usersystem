@@ -1,7 +1,7 @@
 package userprofile
 
 import (
-	"github.com/herb-go/herb/user/profile"
+	"github.com/herb-go/user/profile"
 	"github.com/herb-go/herbsystem"
 	"github.com/herb-go/usersystem"
 	"github.com/herb-go/usersystem/userdataset"

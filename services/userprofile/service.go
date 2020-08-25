@@ -1,6 +1,6 @@
 package userprofile
 
-import "github.com/herb-go/herb/user/profile"
+import "github.com/herb-go/user/profile"
 
 type Service interface {
 	GetProfile(id string) (*profile.Profile, error)

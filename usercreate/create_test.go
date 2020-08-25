@@ -4,7 +4,7 @@ import (
 	"errors"
 	"testing"
 
-	"github.com/herb-go/herb/user"
+	"github.com/herb-go/user"
 	"github.com/herb-go/herbsystem"
 	"github.com/herb-go/usersystem"
 )

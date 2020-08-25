@@ -1,6 +1,6 @@
 package useraccount
 
-import "github.com/herb-go/herb/user"
+import "github.com/herb-go/user"
 
 type Service interface {
 	//Account return account of give uid.

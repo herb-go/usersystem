@@ -1,7 +1,7 @@
 package userstatus
 
 import (
-	"github.com/herb-go/herb/user"
+	"github.com/herb-go/user"
 	"github.com/herb-go/herbsystem"
 	"github.com/herb-go/usersystem"
 	"github.com/herb-go/usersystem/usercreate"

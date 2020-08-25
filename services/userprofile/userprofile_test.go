@@ -7,7 +7,7 @@ import (
 
 	"github.com/herb-go/usersystem/userdataset"
 
-	"github.com/herb-go/herb/user/profile"
+	"github.com/herb-go/user/profile"
 
 	"github.com/herb-go/usersystem"
 )

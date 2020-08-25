@@ -3,7 +3,7 @@ package userstatus
 import (
 	"testing"
 
-	"github.com/herb-go/herb/user"
+	"github.com/herb-go/user"
 	"github.com/herb-go/herbsystem"
 
 	"github.com/herb-go/herbsecurity/authority"
@@ -11,7 +11,7 @@ import (
 	"github.com/herb-go/usersystem/userpurge"
 	"github.com/herb-go/usersystem/usersession"
 
-	"github.com/herb-go/herb/user/status"
+	"github.com/herb-go/user/status"
 	"github.com/herb-go/usersystem"
 )
 
