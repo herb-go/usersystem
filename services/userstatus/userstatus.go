@@ -1,8 +1,10 @@
 package userstatus
 
 import (
-	"github.com/herb-go/user"
+	"context"
+
 	"github.com/herb-go/herbsystem"
+	"github.com/herb-go/user"
 	"github.com/herb-go/usersystem"
 	"github.com/herb-go/usersystem/usercreate"
 	"github.com/herb-go/usersystem/userpurge"
@@ -62,7 +64,7 @@ func (s *UserStatus) ServiceActions() []*herbsystem.Action {
 		}),
 	}
 }
-func (s *UserStatus) CheckSession(session *usersystem.Session) (bool, error) {
+func (s *UserStatus) CheckSession(ctx context.Context, session *usersystem.Session) (bool, error) {
 	id := session.UID()
 	if id == "" {
 		return false, nil

@@ -43,7 +43,7 @@ func (s *UserTerm) InitPayloads(ctx context.Context, st usersystem.SessionType, 
 	payloads.Set(PayloadTerm, []byte(term))
 	return nil
 }
-func (s *UserTerm) CheckSession(session *usersystem.Session) (bool, error) {
+func (s *UserTerm) CheckSession(ctx context.Context, session *usersystem.Session) (bool, error) {
 	uid := session.UID()
 	if uid == "" {
 		return false, nil

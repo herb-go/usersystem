@@ -19,11 +19,11 @@ func GetResult(ctx context.Context) *Result {
 
 var CommandCheckSession = herbsystem.Command("checksession")
 
-func WrapCheckSession(h func(*usersystem.Session) (bool, error)) *herbsystem.Action {
+func WrapCheckSession(h func(ctx context.Context, session *usersystem.Session) (bool, error)) *herbsystem.Action {
 	a := herbsystem.NewAction()
 	a.Command = CommandCheckSession
 	a.Handler = func(ctx context.Context, next func(context.Context) error) error {
-		result, err := h(usersystem.GetSession(ctx))
+		result, err := h(ctx, usersystem.GetSession(ctx))
 		if err != nil {
 			return err
 		}

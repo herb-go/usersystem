@@ -1,9 +1,13 @@
 package sessionpayload
 
-import "github.com/herb-go/usersystem"
+import (
+	"context"
+
+	"github.com/herb-go/usersystem"
+)
 
 type Checker interface {
-	CheckSession(*usersystem.Session) (bool, error)
+	CheckSession(ctx context.Context, session *usersystem.Session) (bool, error)
 	//Start start service
 	Start() error
 	//Stop stop service

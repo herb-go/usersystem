@@ -74,9 +74,9 @@ func (p *SessionPayload) BuildPayload(ctx context.Context, st usersystem.Session
 	}
 	return nil
 }
-func (p *SessionPayload) CheckSession(session *usersystem.Session) (bool, error) {
+func (p *SessionPayload) CheckSession(ctx context.Context, session *usersystem.Session) (bool, error) {
 	for _, v := range p.Checkers {
-		ok, err := v.CheckSession(session)
+		ok, err := v.CheckSession(ctx, session)
 		if err != nil {
 			return false, err
 		}
