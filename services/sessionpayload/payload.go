@@ -30,6 +30,12 @@ func (p *SessionPayload) ConfigurService() error {
 	p.Checkers = []Checker{}
 	return nil
 }
+func (p *SessionPayload) AppendBuilder(b Builder) {
+	p.Builders = append(p.Builders, b)
+}
+func (p *SessionPayload) AppendChecker(c Checker) {
+	p.Checkers = append(p.Checkers, c)
+}
 
 func (p *SessionPayload) ServiceName() string {
 	return ServiceName
