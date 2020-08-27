@@ -65,16 +65,7 @@ func (s *WebSession) ServiceActions() []*herbsystem.Action {
 		}),
 	}
 }
-func (s *WebSession) IdentifyRequest(r *http.Request) (uid string, err error) {
-	session, err := s.GetRequestSession(r)
-	if err != nil {
-		return "", err
-	}
-	if session == nil {
-		return "", nil
-	}
-	return session.UID(), nil
-}
+
 func New() *WebSession {
 	return &WebSession{}
 }

@@ -42,3 +42,18 @@ func (s *InstalledWebSession) Login(r *http.Request, uid string) (*usersystem.Se
 	}
 	return s.Service.LoginRequestSession(r, p)
 }
+
+func (s *InstalledWebSession) IdentifyRequest(r *http.Request) (uid string, err error) {
+	session, err := s.GetRequestSession(r)
+	if err != nil {
+		return "", err
+	}
+	if session == nil {
+		return "", nil
+	}
+	ok, err := usersession.ExecCheckSession(s.UserSystem, session)
+	if !ok {
+		return "", nil
+	}
+	return session.UID(), nil
+}
