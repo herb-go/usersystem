@@ -39,5 +39,5 @@ var PayloadRevokeCode = "revokecode"
 
 type SessionStore interface {
 	GetSession(sessiontype SessionType, id string) (*Session, error)
-	RevokeSession(sessiontype SessionType, code string) (bool, error)
+	RevokeSession(code string) (bool, error)
 }

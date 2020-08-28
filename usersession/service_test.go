@@ -24,7 +24,7 @@ type testService struct {
 
 func (s *testService) ServiceActions() []*herbsystem.Action {
 	return []*herbsystem.Action{
-		WrapCheckSession(func(session *usersystem.Session) (bool, error) {
+		WrapCheckSession(func(ctx context.Context, session *usersystem.Session) (bool, error) {
 			return session.UID() == "exists", nil
 		}),
 		WrapInitPayloads(func(ctx context.Context, st usersystem.SessionType, id string, payloads *authority.Payloads) error {

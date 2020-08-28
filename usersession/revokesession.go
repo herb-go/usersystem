@@ -33,10 +33,12 @@ func WrapRevokeSession(h func(st usersystem.SessionType, code string) (bool, err
 	return a
 }
 
-func ExecRevokeSession(s *usersystem.UserSystem, st usersystem.SessionType, code string) (bool, error) {
+func ExecRevokeSession(s *usersystem.UserSystem, session *usersystem.Session) (bool, error) {
+	code := session.RevokeCode()
 	if code == "" {
 		return false, nil
 	}
+	st := session.Type
 	ctx := usersystem.SessionTypeContext(s.Context, st)
 
 	ctx = context.WithValue(ctx, ContextSessionRevokeCode, code)

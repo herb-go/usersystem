@@ -3,6 +3,8 @@ package usersession
 import (
 	"testing"
 
+	"github.com/herb-go/herbsecurity/authority"
+
 	"github.com/herb-go/usersystem"
 )
 
@@ -13,22 +15,27 @@ func TestRevokeSession(t *testing.T) {
 	s.Configuring()
 	s.Start()
 	defer s.Stop()
-
-	ok, err := ExecRevokeSession(s, "test", "")
+	session := usersystem.NewSession().WithType("test").WithPayloads(authority.NewPayloads())
+	session.Payloads.Set(usersystem.PayloadRevokeCode, []byte(""))
+	ok, err := ExecRevokeSession(s, session)
 	if err != nil {
 		t.Fatal(err)
 	}
 	if ok {
 		t.Fatal(ok)
 	}
-	ok, err = ExecRevokeSession(s, "test", "notexist")
+	session = usersystem.NewSession().WithType("test").WithPayloads(authority.NewPayloads())
+	session.Payloads.Set(usersystem.PayloadRevokeCode, []byte("notexist"))
+	ok, err = ExecRevokeSession(s, session)
 	if err != nil {
 		t.Fatal(err)
 	}
 	if ok {
 		t.Fatal(ok)
 	}
-	ok, err = ExecRevokeSession(s, "test", "revokecode")
+	session = usersystem.NewSession().WithType("test").WithPayloads(authority.NewPayloads())
+	session.Payloads.Set(usersystem.PayloadRevokeCode, []byte("revokecode"))
+	ok, err = ExecRevokeSession(s, session)
 	if err != nil {
 		t.Fatal(err)
 	}

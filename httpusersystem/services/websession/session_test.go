@@ -36,7 +36,7 @@ func (s *testService) GetSession(st usersystem.SessionType, id string) (*usersys
 	session.WithType(st)
 	return session, nil
 }
-func (s *testService) RevokeSession(st usersystem.SessionType, code string) (bool, error) {
+func (s *testService) RevokeSession(code string) (bool, error) {
 	_, ok := s.sessions[code]
 	if !ok {
 		return false, nil
@@ -130,7 +130,9 @@ func TestHTTPSession(t *testing.T) {
 	if us == nil || err != nil {
 		t.Fatal()
 	}
-	ok, err := usersession.ExecRevokeSession(s, usersystem.SessionType("notexists"), "test")
+	sessionnotexist := usersystem.NewSession().WithType("notexists").WithPayloads(authority.NewPayloads())
+	sessionnotexist.Payloads.Set(usersystem.PayloadRevokeCode, []byte("test"))
+	ok, err := usersession.ExecRevokeSession(s, sessionnotexist)
 	if ok || err != nil {
 		t.Fatal()
 	}
@@ -138,7 +140,9 @@ func TestHTTPSession(t *testing.T) {
 	if us == nil || err != nil {
 		t.Fatal()
 	}
-	ok, err = usersession.ExecRevokeSession(s, SessionType, "test")
+	us = usersystem.NewSession().WithType(SessionType).WithPayloads(authority.NewPayloads())
+	us.Payloads.Set(usersystem.PayloadRevokeCode, []byte("test"))
+	ok, err = usersession.ExecRevokeSession(s, us)
 	if !ok || err != nil {
 		t.Fatal()
 	}

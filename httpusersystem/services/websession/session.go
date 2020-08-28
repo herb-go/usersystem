@@ -61,7 +61,7 @@ func (s *WebSession) ServiceActions() []*herbsystem.Action {
 			if st != s.Type {
 				return false, nil
 			}
-			return s.Service.RevokeSession(st, code)
+			return s.Service.RevokeSession(code)
 		}),
 	}
 }
