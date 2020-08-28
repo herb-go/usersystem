@@ -63,13 +63,13 @@ func (s *ActiveSessions) ServiceActions() []*herbsystem.Action {
 func New() *ActiveSessions {
 	return &ActiveSessions{}
 }
-func MustNewAndInstallTo(s *usersystem.UserSystem) *InstalledManager {
+func MustNewAndInstallTo(s *usersystem.UserSystem) *InstalledAcitveSessions {
 	as := New()
 	err := s.InstallService(as)
 	if err != nil {
 		panic(err)
 	}
-	i := NewInstalledManager()
+	i := NewInstalledAcitveSessions()
 	i.ActiveSessions = as
 	i.UserSystem = s
 	return i

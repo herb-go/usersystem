@@ -77,7 +77,7 @@ func TestActiveSessionsManager(t *testing.T) {
 	if sn == "" {
 		t.Fatal(sn)
 	}
-	err = m.PurgeActiveSession("test", "test", "123455")
+	err = m.PurgeActiveSession(session)
 	if err != nil {
 		panic(err)
 	}

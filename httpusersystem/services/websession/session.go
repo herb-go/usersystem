@@ -34,7 +34,9 @@ func (s *WebSession) StartService() error {
 func (s *WebSession) StopService() error {
 	return s.Service.Stop()
 }
-
+func (s *WebSession) GetSession(id string) (*usersystem.Session, error) {
+	return s.Service.GetSession(s.Type, id)
+}
 func (s *WebSession) GetRequestSession(r *http.Request) (*usersystem.Session, error) {
 	return s.Service.GetRequestSession(r, s.Type)
 }
