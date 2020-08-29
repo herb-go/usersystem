@@ -1,10 +1,11 @@
 package userstatus
 
 import (
+	"sort"
 	"testing"
 
-	"github.com/herb-go/user"
 	"github.com/herb-go/herbsystem"
+	"github.com/herb-go/user"
 
 	"github.com/herb-go/herbsecurity/authority"
 	"github.com/herb-go/usersystem/usercreate"
@@ -66,6 +67,36 @@ func (s *testService) RemoveStatus(id string) error {
 	delete(s.Statuses, id)
 	return nil
 }
+func (s *testService) getAfterLast(last string, users []string) []string {
+	sort.Strings(users)
+	if last == "" {
+		return users
+	}
+	for k := range users {
+		if users[k] > last {
+			return users[k:]
+		}
+	}
+	return []string{}
+}
+func (s *testService) ListUsersByStatus(last string, limit int, st ...status.Status) ([]string, bool, error) {
+	m := map[status.Status]bool{}
+	for _, v := range st {
+		m[v] = true
+	}
+	alluser := []string{}
+	for k, v := range s.Statuses {
+		if m[v] {
+			alluser = append(alluser, k)
+		}
+	}
+	result := s.getAfterLast(last, alluser)
+	if limit > 0 && limit < len(result) {
+		return result[:limit], false, nil
+	}
+	return result, true, nil
+}
+
 func newTestService() *testService {
 	return &testService{
 		Service:  status.NormalOrBannedService,
@@ -179,5 +210,8 @@ func TestStatus(t *testing.T) {
 	if ok || err != nil {
 		t.Fatal()
 	}
-
+	ids, finish, err := userstatus.ListUsersByStatus("", 0, status.StatusNormal)
+	if len(ids) != 1 || !finish || err != nil {
+		t.Fatal(ids, finish, err)
+	}
 }

@@ -7,6 +7,7 @@ type Service interface {
 	UpdateStatus(string, status.Status) error
 	CreateStatus(string) error
 	RemoveStatus(string) error
+	ListUsersByStatus(last string, limit int, statuses ...status.Status) ([]string, bool, error)
 	status.Service
 	//Start start service
 	Start() error
