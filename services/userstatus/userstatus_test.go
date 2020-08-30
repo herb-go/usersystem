@@ -79,7 +79,7 @@ func (s *testService) getAfterLast(last string, users []string) []string {
 	}
 	return []string{}
 }
-func (s *testService) ListUsersByStatus(last string, limit int, st ...status.Status) ([]string, bool, error) {
+func (s *testService) ListUsersByStatus(last string, limit int, st ...status.Status) ([]string, error) {
 	m := map[status.Status]bool{}
 	for _, v := range st {
 		m[v] = true
@@ -92,9 +92,9 @@ func (s *testService) ListUsersByStatus(last string, limit int, st ...status.Sta
 	}
 	result := s.getAfterLast(last, alluser)
 	if limit > 0 && limit < len(result) {
-		return result[:limit], false, nil
+		return result[:limit], nil
 	}
-	return result, true, nil
+	return result, nil
 }
 
 func newTestService() *testService {
@@ -210,8 +210,8 @@ func TestStatus(t *testing.T) {
 	if ok || err != nil {
 		t.Fatal()
 	}
-	ids, finish, err := userstatus.ListUsersByStatus("", 0, status.StatusNormal)
-	if len(ids) != 1 || !finish || err != nil {
-		t.Fatal(ids, finish, err)
+	ids, err := userstatus.ListUsersByStatus("", 0, status.StatusNormal)
+	if len(ids) != 1 || err != nil {
+		t.Fatal(ids, err)
 	}
 }
