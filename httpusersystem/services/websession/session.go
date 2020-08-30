@@ -1,8 +1,6 @@
 package websession
 
 import (
-	"net/http"
-
 	"github.com/herb-go/herbsystem"
 	"github.com/herb-go/usersystem"
 	"github.com/herb-go/usersystem/usersession"
@@ -13,6 +11,10 @@ const SessionKeyPrefix = "."
 var ServiceName = "websession"
 
 var SessionType = usersystem.SessionType("web")
+
+type ContextSession struct {
+	Session *usersystem.Session
+}
 
 type WebSession struct {
 	herbsystem.NopService
@@ -37,20 +39,7 @@ func (s *WebSession) StopService() error {
 func (s *WebSession) GetSession(id string) (*usersystem.Session, error) {
 	return s.Service.GetSession(s.Type, id)
 }
-func (s *WebSession) GetRequestSession(r *http.Request) (*usersystem.Session, error) {
-	return s.Service.GetRequestSession(r, s.Type)
-}
-func (s *WebSession) Logout(r *http.Request) (bool, error) {
-	return s.Service.LogoutRequestSession(r)
-}
 
-func (s *WebSession) LogoutMiddleware(w http.ResponseWriter, r *http.Request, next http.HandlerFunc) {
-	_, err := s.Logout(r)
-	if err != nil {
-		panic(err)
-	}
-	next(w, r)
-}
 func (s *WebSession) ServiceActions() []*herbsystem.Action {
 	return []*herbsystem.Action{
 		usersession.WrapGetSession(func(st usersystem.SessionType, id string) (*usersystem.Session, error) {
