@@ -55,6 +55,9 @@ func (s *ActiveSessions) ServiceActions() []*herbsystem.Action {
 			if err != nil {
 				return err
 			}
+			if serialnumber == "" {
+				return nil
+			}
 			p.Set(PayloadSerialNumber, []byte(serialnumber))
 			return nil
 		}),
