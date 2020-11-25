@@ -3,8 +3,8 @@ package useraccount
 import "github.com/herb-go/user"
 
 type Service interface {
-	//Account return account of give uid.
-	Account(uid string) (*user.Accounts, error)
+	//Accounts return accounts of give uid.
+	Accounts(uid string) (*user.Accounts, error)
 	//AccountToUID query uid by user account.
 	//Return user id and any error if raised.
 	//Return empty string as userid if account not found.
