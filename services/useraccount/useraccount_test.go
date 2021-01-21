@@ -22,7 +22,7 @@ func (s *testService) Stop() error {
 }
 
 //Account return account of give uid.
-func (s *testService) Account(uid string) (*user.Accounts, error) {
+func (s *testService) Accounts(uid string) (*user.Accounts, error) {
 	v, ok := s.accounts[uid]
 	if !ok {
 		return user.NewAccounts(), nil
@@ -92,7 +92,7 @@ func TestUserAccount(t *testing.T) {
 	if err != nil {
 		panic(err)
 	}
-	accounts, err := useraccount.Account("test")
+	accounts, err := useraccount.Accounts("test")
 	if err != nil {
 		panic(err)
 	}
@@ -110,7 +110,7 @@ func TestUserAccount(t *testing.T) {
 	if err != nil {
 		panic(err)
 	}
-	accounts, err = useraccount.Account("test")
+	accounts, err = useraccount.Accounts("test")
 	if err != nil {
 		panic(err)
 	}
