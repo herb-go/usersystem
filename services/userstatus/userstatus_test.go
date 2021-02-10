@@ -67,8 +67,12 @@ func (s *testService) RemoveStatus(id string) error {
 	delete(s.Statuses, id)
 	return nil
 }
-func (s *testService) getAfterLast(last string, users []string) []string {
-	sort.Strings(users)
+func (s *testService) getAfterLast(last string, users []string, reverse bool) []string {
+	if reverse {
+		sort.Sort(sort.Reverse(sort.StringSlice(users)))
+	} else {
+		sort.Strings(users)
+	}
 	if last == "" {
 		return users
 	}
@@ -79,7 +83,7 @@ func (s *testService) getAfterLast(last string, users []string) []string {
 	}
 	return []string{}
 }
-func (s *testService) ListUsersByStatus(last string, limit int, st ...status.Status) ([]string, error) {
+func (s *testService) ListUsersByStatus(last string, limit int, reverse bool, st ...status.Status) ([]string, error) {
 	m := map[status.Status]bool{}
 	for _, v := range st {
 		m[v] = true
@@ -90,7 +94,7 @@ func (s *testService) ListUsersByStatus(last string, limit int, st ...status.Sta
 			alluser = append(alluser, k)
 		}
 	}
-	result := s.getAfterLast(last, alluser)
+	result := s.getAfterLast(last, alluser, reverse)
 	if limit > 0 && limit < len(result) {
 		return result[:limit], nil
 	}
@@ -210,7 +214,7 @@ func TestStatus(t *testing.T) {
 	if ok || err != nil {
 		t.Fatal()
 	}
-	ids, err := userstatus.ListUsersByStatus("", 0, status.StatusNormal)
+	ids, err := userstatus.ListUsersByStatus("", 0, false, status.StatusNormal)
 	if len(ids) != 1 || err != nil {
 		t.Fatal(ids, err)
 	}
