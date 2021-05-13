@@ -8,8 +8,8 @@ import (
 
 type UserSystem struct {
 	Keyword Keyword
+	*herbsystem.BasicSystem
 	Context context.Context
-	*herbsystem.System
 }
 
 func (u *UserSystem) WithKeyword(k Keyword) *UserSystem {
@@ -19,7 +19,7 @@ func (u *UserSystem) WithKeyword(k Keyword) *UserSystem {
 
 func New() *UserSystem {
 	s := &UserSystem{
-		System: herbsystem.NewSystem(),
+		BasicSystem: herbsystem.New(),
 	}
 	s.Context = context.WithValue(context.Background(), ContextKeyUsersystem, s)
 	return s
