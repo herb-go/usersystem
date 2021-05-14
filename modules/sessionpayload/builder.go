@@ -15,10 +15,10 @@ type Builder interface {
 	Stop() error
 }
 
-type BuilderFunc func(context.Context, usersystem.SessionType, string, *authority.Payloads) error
+type BuilderFunc func(context.Context, usersystem.SessionType, string, *authority.Payloads)
 
-func (f BuilderFunc) BuildPayloads(ctx context.Context, st usersystem.SessionType, uid string, p *authority.Payloads) error {
-	return f(ctx, st, uid, p)
+func (f BuilderFunc) MustBuildPayloads(ctx context.Context, st usersystem.SessionType, uid string, p *authority.Payloads) {
+	f(ctx, st, uid, p)
 }
 
 //Start start service

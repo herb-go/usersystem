@@ -14,9 +14,9 @@ type Checker interface {
 	Stop() error
 }
 
-type CheckerFunc func(ctx context.Context, session *usersystem.Session) (bool, error)
+type CheckerFunc func(ctx context.Context, session *usersystem.Session) bool
 
-func (f CheckerFunc) CheckSession(ctx context.Context, session *usersystem.Session) (bool, error) {
+func (f CheckerFunc) MustCheckSession(ctx context.Context, session *usersystem.Session) bool {
 	return f(ctx, session)
 }
 
