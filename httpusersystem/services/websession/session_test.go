@@ -9,6 +9,8 @@ import (
 	"net/http/httptest"
 	"testing"
 
+	"github.com/herb-go/herbsystem"
+
 	"github.com/herb-go/usersystem/usersession"
 
 	"github.com/herb-go/herbsecurity/authority"
@@ -28,21 +30,21 @@ type testService struct {
 	values   map[string][]byte
 }
 
-func (s *testService) GetSession(st usersystem.SessionType, id string) (*usersystem.Session, error) {
+func (s *testService) MustGetSession(st usersystem.SessionType, id string) *usersystem.Session {
 	session, ok := s.sessions[id]
 	if !ok {
-		return nil, nil
+		return nil
 	}
 	session.WithType(st)
-	return session, nil
+	return session
 }
-func (s *testService) RevokeSession(code string) (bool, error) {
+func (s *testService) MustRevokeSession(code string) bool {
 	_, ok := s.sessions[code]
 	if !ok {
-		return false, nil
+		return false
 	}
 	delete(s.sessions, code)
-	return true, nil
+	return true
 }
 func (s *testService) SessionMiddleware() func(w http.ResponseWriter, r *http.Request, next http.HandlerFunc) {
 	return func(w http.ResponseWriter, r *http.Request, next http.HandlerFunc) {
@@ -51,24 +53,24 @@ func (s *testService) SessionMiddleware() func(w http.ResponseWriter, r *http.Re
 		next(w, r)
 	}
 }
-func (s *testService) GetRequestSession(r *http.Request, st usersystem.SessionType) (*usersystem.Session, error) {
+func (s *testService) MustGetRequestSession(r *http.Request, st usersystem.SessionType) *usersystem.Session {
 	v := r.Context().Value("session")
 	session, ok := v.(*usersystem.Session)
 	if !ok {
-		return nil, nil
+		return nil
 	}
-	return session, nil
+	return session
 }
-func (s *testService) LoginRequestSession(r *http.Request, payloads *authority.Payloads) (*usersystem.Session, error) {
+func (s *testService) MustLoginRequestSession(r *http.Request, payloads *authority.Payloads) *usersystem.Session {
 	session := usersystem.NewSession().WithPayloads(payloads).WithID("id")
 	req := r.WithContext(context.WithValue(r.Context(), "session", session))
 	*r = *req
-	return session, nil
+	return session
 }
-func (s *testService) LogoutRequestSession(r *http.Request) (bool, error) {
+func (s *testService) MustLogoutRequestSession(r *http.Request) bool {
 	req := r.WithContext(context.WithValue(r.Context(), "session", nil))
 	*r = *req
-	return true, nil
+	return true
 }
 func (s *testService) Set(r *http.Request, fieldname string, v interface{}) error {
 	bs, err := json.Marshal(v)
@@ -116,46 +118,47 @@ func TestHTTPSession(t *testing.T) {
 	s := usersystem.New()
 	ss := newTestService()
 	session := MustNewAndInstallTo(s)
-	s.Ready()
-	s.Configuring()
-	session.Service = ss
-	s.Start()
-	defer s.Stop()
-	ss.sessions["test"] = testSession("test")
-	us, err := usersession.ExecGetSession(s, usersystem.SessionType("notexists"), "test")
-	if us != nil || err != nil {
+	herbsystem.MustReady(s)
+	herbsystem.MustConfigure(s)
+	if MustGetModule(s) != session.WebSession {
 		t.Fatal()
 	}
-	us, err = usersession.ExecGetSession(s, SessionType, "test")
+	session.Service = ss
+	herbsystem.MustStart(s)
+	defer herbsystem.MustStop(s)
+
+	ss.sessions["test"] = testSession("test")
+	us := usersession.MustExecGetSession(s, usersystem.SessionType("notexists"), "test")
+	if us != nil {
+		t.Fatal()
+	}
+	us = usersession.MustExecGetSession(s, SessionType, "test")
 	if us == nil || err != nil {
 		t.Fatal()
 	}
 	sessionnotexist := usersystem.NewSession().WithType("notexists").WithPayloads(authority.NewPayloads())
 	sessionnotexist.Payloads.Set(usersystem.PayloadRevokeCode, []byte("test"))
-	ok, err := usersession.ExecRevokeSession(s, sessionnotexist)
-	if ok || err != nil {
+	ok := usersession.MustExecRevokeSession(s, sessionnotexist)
+	if ok {
 		t.Fatal()
 	}
-	us, err = usersession.ExecGetSession(s, SessionType, "test")
-	if us == nil || err != nil {
+	us = usersession.MustExecGetSession(s, SessionType, "test")
+	if us == nil {
 		t.Fatal()
 	}
 	us = usersystem.NewSession().WithType(SessionType).WithPayloads(authority.NewPayloads())
 	us.Payloads.Set(usersystem.PayloadRevokeCode, []byte("test"))
-	ok, err = usersession.ExecRevokeSession(s, us)
-	if !ok || err != nil {
+	ok = usersession.MustExecRevokeSession(s, us)
+	if !ok {
 		t.Fatal()
 	}
-	us, err = usersession.ExecGetSession(s, SessionType, "test")
+	us = usersession.MustExecGetSession(s, SessionType, "test")
 	if us != nil || err != nil {
 		t.Fatal()
 	}
 	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		session.Middleware()(w, r, func(w http.ResponseWriter, r *http.Request) {
-			s, err := session.GetRequestSession(r)
-			if err != nil {
-				panic(err)
-			}
+			s := session.MustGetRequestSession(r)
 			if s == nil {
 				w.Write([]byte(""))
 				return
@@ -184,28 +187,20 @@ func TestHTTPSession(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	us, err = session.Login(req, "ttt")
-	if err != nil {
-		t.Fatal(err)
-	}
+	us = session.MustLogin(req, "ttt")
 	if us.UID() != "ttt" {
 		t.Fatal(us.UID())
 	}
-	us2, err := session.GetRequestSession(req)
-	if err != nil {
-		t.Fatal(err)
-	}
+	us2 := session.MustGetRequestSession(req)
+
 	if us2.ID != us.ID {
 		t.Fatal(us2, us)
 	}
-	ok, err = session.Logout(req)
-	if !ok || err != nil {
+	ok = session.MustLogout(req)
+	if !ok {
 		t.Fatal(ok, err)
 	}
-	us2, err = session.GetRequestSession(req)
-	if err != nil {
-		t.Fatal(err)
-	}
+	us2 = session.MustGetRequestSession(req)
 	if us2 != nil {
 		t.Fatal(us2)
 	}
@@ -231,6 +226,15 @@ func TestHTTPSession(t *testing.T) {
 	}
 	err = session.Get(req, "test", &result)
 	if err == nil || !session.IsNotFoundError(err) {
+		t.Fatal()
+	}
+}
+
+func TestMustGetModule(t *testing.T) {
+	s := usersystem.New()
+	herbsystem.MustReady(s)
+	herbsystem.MustConfigure(s)
+	if MustGetModule(s) != nil {
 		t.Fatal()
 	}
 }

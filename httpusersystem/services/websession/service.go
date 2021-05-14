@@ -10,9 +10,9 @@ import (
 type Service interface {
 	usersystem.SessionStore
 	SessionMiddleware() func(w http.ResponseWriter, r *http.Request, next http.HandlerFunc)
-	GetRequestSession(r *http.Request, st usersystem.SessionType) (*usersystem.Session, error)
-	LoginRequestSession(r *http.Request, payloads *authority.Payloads) (*usersystem.Session, error)
-	LogoutRequestSession(r *http.Request) (bool, error)
+	MustGetRequestSession(r *http.Request, st usersystem.SessionType) *usersystem.Session
+	MustLoginRequestSession(r *http.Request, payloads *authority.Payloads) *usersystem.Session
+	MustLogoutRequestSession(r *http.Request) bool
 	// Set set session by field name with given value.
 	Set(r *http.Request, fieldname string, v interface{}) error
 	//Get get session by field name with given value.
