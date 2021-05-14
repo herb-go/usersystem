@@ -3,28 +3,23 @@ package usersession
 import (
 	"testing"
 
+	"github.com/herb-go/herbsystem"
 	"github.com/herb-go/usersystem"
 )
 
 func TestGetSession(t *testing.T) {
 	s := usersystem.New()
-	s.InstallService(&testService{})
-	s.Ready()
-	s.Configuring()
-	s.Start()
-	defer s.Stop()
+	s.MustRegisterSystemModule(&testModule{})
+	herbsystem.MustReady(s)
+	herbsystem.MustConfigure(s)
+	herbsystem.MustStart(s)
+	defer herbsystem.MustStop(s)
 
-	session, err := ExecGetSession(s, "test", "ttt")
-	if err != nil {
-		t.Fatal(err)
-	}
+	session := MustExecGetSession(s, "test", "ttt")
 	if session.UID() != "got" {
 		t.Fatal(session)
 	}
-	session, err = ExecGetSession(s, "notexists", "ttt")
-	if err != nil {
-		t.Fatal(err)
-	}
+	session = MustExecGetSession(s, "notexists", "ttt")
 	if session != nil {
 		t.Fatal(session)
 	}

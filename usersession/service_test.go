@@ -18,34 +18,33 @@ func testSession(id string) *usersystem.Session {
 	return usersystem.NewSession().WithType("test").WithPayloads(p)
 }
 
-type testService struct {
-	herbsystem.NopService
+type testModule struct {
+	herbsystem.NopModule
 }
 
-func (s *testService) ServiceActions() []*herbsystem.Action {
-	return []*herbsystem.Action{
-		WrapCheckSession(func(ctx context.Context, session *usersystem.Session) (bool, error) {
-			return session.UID() == "exists", nil
+func (s *testModule) InitProcess(ctx context.Context, system herbsystem.System, next func(context.Context, herbsystem.System)) {
+	system.MountSystemActions(
+		WrapCheckSession(func(ctx context.Context, session *usersystem.Session) bool {
+			return session.UID() == "exists"
 		}),
-		WrapInitPayloads(func(ctx context.Context, st usersystem.SessionType, id string, payloads *authority.Payloads) error {
+		WrapInitPayloads(func(ctx context.Context, st usersystem.SessionType, id string, payloads *authority.Payloads) {
 			payloads.Set("test", []byte("testvalue"))
-			return nil
 		}),
-		WrapOnSessionActive(func(session *usersystem.Session) error {
+		WrapOnSessionActive(func(session *usersystem.Session) {
 			lastactive = session.UID()
-			return nil
 		}),
-		WrapGetSession(func(st usersystem.SessionType, id string) (*usersystem.Session, error) {
+		WrapGetSession(func(st usersystem.SessionType, id string) *usersystem.Session {
 			if st != usersystem.SessionType("test") {
-				return nil, nil
+				return nil
 			}
-			return testSession("got"), nil
+			return testSession("got")
 		}),
-		WrapRevokeSession(func(st usersystem.SessionType, code string) (bool, error) {
+		WrapRevokeSession(func(st usersystem.SessionType, code string) bool {
 			if st != usersystem.SessionType("test") {
-				return false, nil
+				return false
 			}
-			return code == "revokecode", nil
+			return code == "revokecode"
 		}),
-	}
+	)
+	next(ctx, system)
 }

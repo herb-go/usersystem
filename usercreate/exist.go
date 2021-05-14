@@ -17,32 +17,22 @@ type result struct {
 	exists bool
 }
 
-func WrapExist(h func(string) (bool, error)) *herbsystem.Action {
-	a := herbsystem.NewAction()
-	a.Command = CommandExist
-	a.Handler = func(ctx context.Context, next func(context.Context) error) error {
-
-		ok, err := h(usersystem.GetUID(ctx))
-		if err != nil {
-			return err
-		}
+func WrapExist(h func(string) bool) *herbsystem.Action {
+	return herbsystem.CreateAction(CommandExist, func(ctx context.Context, system herbsystem.System, next func(context.Context, herbsystem.System)) {
+		ok := h(usersystem.GetUID(ctx))
 		if ok {
 			r := ctx.Value(contextkeyResult).(*result)
 			r.exists = true
-			return nil
+			return
 		}
-		return next(ctx)
-	}
-	return a
+		next(ctx, system)
+	})
 }
 
-func ExecExist(s *usersystem.UserSystem, uid string) (bool, error) {
+func MustExecExist(s *usersystem.UserSystem, uid string) bool {
 	r := &result{exists: false}
-	ctx := usersystem.UIDContext(s.Context, uid)
+	ctx := usersystem.UIDContext(s.SystemContext(), uid)
 	ctx = context.WithValue(ctx, contextkeyResult, r)
-	_, err := s.System.ExecActions(ctx, CommandExist)
-	if err != nil {
-		return false, err
-	}
-	return r.exists, nil
+	herbsystem.MustExecActions(ctx, s, CommandExist)
+	return r.exists
 }

@@ -23,38 +23,26 @@ func GetDataset(ctx context.Context) usersystem.Dataset {
 
 var NewDatasetCommand = herbsystem.Command("newdataset")
 
-func WrapNewDataset(h func(s *usersystem.UserSystem) (usersystem.Dataset, error)) *herbsystem.Action {
-	a := herbsystem.NewAction()
-	a.Command = NewDatasetCommand
-	a.Handler = func(ctx context.Context, next func(context.Context) error) error {
-		ds, err := h(usersystem.GetUsersystem(ctx))
-		if err != nil {
-			return err
-		}
+func WrapNewDataset(h func(s *usersystem.UserSystem) usersystem.Dataset) *herbsystem.Action {
+	return herbsystem.CreateAction(NewDatasetCommand, func(ctx context.Context, system herbsystem.System, next func(context.Context, herbsystem.System)) {
+		ds := h(system.(*usersystem.UserSystem))
 		ctx = WithDataset(ctx, ds)
-		return next(ctx)
-	}
-	return a
+		next(ctx, system)
+	})
 }
 
-func NewDefaultDataset(s *usersystem.UserSystem) (usersystem.Dataset, error) {
+func NewDefaultDataset(s *usersystem.UserSystem) usersystem.Dataset {
 	ds := usersystem.NewPlainDataset()
-	err := ExecInitDataset(s, ds)
-	if err != nil {
-		return nil, err
-	}
-	return ds, nil
+	MustExecInitDataset(s, ds)
+	return ds
 }
 
-func ExecNewDataset(s *usersystem.UserSystem) (usersystem.Dataset, error) {
-	ctx, err := s.System.ExecActions(s.Context, NewDatasetCommand)
-	if err != nil {
-		return nil, err
-	}
+func MustExecNewDataset(s *usersystem.UserSystem) usersystem.Dataset {
+	ctx := herbsystem.MustExecActions(s.SystemContext(), s, NewDatasetCommand)
 	v := ctx.Value(ContextKeyDataset)
 	ds, ok := v.(usersystem.Dataset)
 	if !ok {
 		return NewDefaultDataset(s)
 	}
-	return ds, nil
+	return ds
 }

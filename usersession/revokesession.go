@@ -15,31 +15,26 @@ func GetSessionRevokeCode(ctx context.Context) string {
 
 var CommandRevokeSession = herbsystem.Command("revokesession")
 
-func WrapRevokeSession(h func(st usersystem.SessionType, code string) (bool, error)) *herbsystem.Action {
-	a := herbsystem.NewAction()
-	a.Command = CommandRevokeSession
-	a.Handler = func(ctx context.Context, next func(context.Context) error) error {
-		ok, err := h(usersystem.GetSessionType(ctx), GetSessionRevokeCode(ctx))
-		if err != nil {
-			return err
-		}
+func WrapRevokeSession(h func(st usersystem.SessionType, code string) bool) *herbsystem.Action {
+	return herbsystem.CreateAction(CommandRevokeSession, func(ctx context.Context, system herbsystem.System, next func(context.Context, herbsystem.System)) {
+		ok := h(usersystem.GetSessionType(ctx), GetSessionRevokeCode(ctx))
 		if ok {
 			r := GetResult(ctx)
 			r.Success = true
-			return nil
+			return
 		}
-		return next(ctx)
-	}
-	return a
+		next(ctx, system)
+
+	})
 }
 
-func ExecRevokeSession(s *usersystem.UserSystem, session *usersystem.Session) (bool, error) {
+func MustExecRevokeSession(s *usersystem.UserSystem, session *usersystem.Session) bool {
 	code := session.RevokeCode()
 	if code == "" {
-		return false, nil
+		return false
 	}
 	st := session.Type
-	ctx := usersystem.SessionTypeContext(s.Context, st)
+	ctx := usersystem.SessionTypeContext(s.SystemContext(), st)
 
 	ctx = context.WithValue(ctx, ContextSessionRevokeCode, code)
 	result := &Result{
@@ -47,9 +42,6 @@ func ExecRevokeSession(s *usersystem.UserSystem, session *usersystem.Session) (b
 	}
 	ctx = context.WithValue(ctx, ContextKeyCheckSessionResult, result)
 
-	ctx, err := s.System.ExecActions(ctx, CommandRevokeSession)
-	if err != nil {
-		return false, err
-	}
-	return result.Success, nil
+	herbsystem.MustExecActions(ctx, s, CommandRevokeSession)
+	return result.Success
 }

@@ -15,20 +15,16 @@ type Purgeable interface {
 var Command = herbsystem.Command("purge")
 
 func Wrap(h Purgeable) *herbsystem.Action {
-	a := herbsystem.NewAction()
-	a.Command = Command
-	a.Handler = func(ctx context.Context, next func(context.Context) error) error {
+	return herbsystem.CreateAction(Command, func(ctx context.Context, system herbsystem.System, next func(context.Context, herbsystem.System)) {
 		err := h.Purge(usersystem.GetUID(ctx))
 		if err != nil {
-			return err
+			panic(err)
 		}
-		return next(ctx)
-	}
-	return a
+		next(ctx, system)
+	})
 }
 
-func ExecPurge(s *usersystem.UserSystem, uid string) error {
-	ctx := usersystem.UIDContext(s.Context, uid)
-	_, err := s.System.ExecActions(ctx, Command)
-	return err
+func MustExecPurge(s *usersystem.UserSystem, uid string) {
+	ctx := usersystem.UIDContext(s.SystemContext(), uid)
+	herbsystem.MustExecActions(ctx, s, Command)
 }

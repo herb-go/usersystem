@@ -19,35 +19,24 @@ func GetResult(ctx context.Context) *Result {
 
 var CommandCheckSession = herbsystem.Command("checksession")
 
-func WrapCheckSession(h func(ctx context.Context, session *usersystem.Session) (bool, error)) *herbsystem.Action {
-	a := herbsystem.NewAction()
-	a.Command = CommandCheckSession
-	a.Handler = func(ctx context.Context, next func(context.Context) error) error {
-		result, err := h(ctx, usersystem.GetSession(ctx))
-		if err != nil {
-			return err
-		}
+func WrapCheckSession(h func(ctx context.Context, session *usersystem.Session) bool) *herbsystem.Action {
+	return herbsystem.CreateAction(CommandCheckSession, func(ctx context.Context, system herbsystem.System, next func(context.Context, herbsystem.System)) {
+		result := h(ctx, usersystem.GetSession(ctx))
 		if !result {
 			r := GetResult(ctx)
 			r.Success = false
-			return nil
+			return
 		}
-		return next(ctx)
-	}
-	return a
+		next(ctx, system)
+	})
 }
 
-func ExecCheckSession(s *usersystem.UserSystem, session *usersystem.Session) (bool, error) {
-	var err error
-	ctx := usersystem.SessionContext(s.Context, session)
+func MustExecCheckSession(s *usersystem.UserSystem, session *usersystem.Session) bool {
+	ctx := usersystem.SessionContext(s.SystemContext(), session)
 	result := &Result{
 		Success: true,
 	}
 	ctx = context.WithValue(ctx, ContextKeyCheckSessionResult, result)
-
-	ctx, err = s.System.ExecActions(ctx, CommandCheckSession)
-	if err != nil {
-		return false, err
-	}
-	return result.Success, nil
+	ctx = herbsystem.MustExecActions(ctx, s, CommandCheckSession)
+	return result.Success
 }

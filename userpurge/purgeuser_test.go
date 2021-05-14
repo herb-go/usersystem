@@ -1,6 +1,7 @@
 package userpurge
 
 import (
+	"context"
 	"testing"
 
 	"github.com/herb-go/usersystem"
@@ -8,35 +9,31 @@ import (
 	"github.com/herb-go/herbsystem"
 )
 
-type testService struct {
-	herbsystem.NopService
+type testModule struct {
+	herbsystem.NopModule
 	Cached map[string]string
 }
 
-func (s *testService) Purge(uid string) error {
-	delete(s.Cached, uid)
+func (m *testModule) Purge(uid string) error {
+	delete(m.Cached, uid)
 	return nil
 }
 
-func (s *testService) ServiceActions() []*herbsystem.Action {
-	return []*herbsystem.Action{
-		Wrap(s),
-	}
+func (m *testModule) InitProcess(ctx context.Context, system herbsystem.System, next func(context.Context, herbsystem.System)) {
+	system.MountSystemActions(Wrap(m))
+	next(ctx, system)
 }
 
 func TestPurge(t *testing.T) {
 	s := usersystem.New()
-	service := &testService{Cached: map[string]string{"test": "test"}}
-	s.InstallService(service)
-	s.Ready()
-	s.Configuring()
-	s.Start()
-	defer s.Stop()
-	err := ExecPurge(s, "test")
-	if err != nil {
-		panic(err)
-	}
-	if service.Cached["test"] != "" {
+	m := &testModule{Cached: map[string]string{"test": "test"}}
+	s.MustRegisterSystemModule(m)
+	herbsystem.MustReady(s)
+	herbsystem.MustConfigure(s)
+	herbsystem.MustStart(s)
+	defer herbsystem.MustStop(s)
+	MustExecPurge(s, "test")
+	if m.Cached["test"] != "" {
 		t.Fatal()
 	}
 }

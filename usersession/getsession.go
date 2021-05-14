@@ -15,34 +15,26 @@ func GetSessionID(ctx context.Context) string {
 
 var CommandGetSession = herbsystem.Command("getsession")
 
-func WrapGetSession(h func(st usersystem.SessionType, id string) (*usersystem.Session, error)) *herbsystem.Action {
-	a := herbsystem.NewAction()
-	a.Command = CommandGetSession
-	a.Handler = func(ctx context.Context, next func(context.Context) error) error {
-		session, err := h(usersystem.GetSessionType(ctx), GetSessionID(ctx))
-		if err != nil {
-			return err
-		}
+func WrapGetSession(h func(st usersystem.SessionType, id string) *usersystem.Session) *herbsystem.Action {
+	return herbsystem.CreateAction(CommandGetSession, func(ctx context.Context, system herbsystem.System, next func(context.Context, herbsystem.System)) {
+		session := h(usersystem.GetSessionType(ctx), GetSessionID(ctx))
 		if session != nil {
 			ctx = usersystem.SessionContext(ctx, session)
 		}
-		return next(ctx)
-	}
-	return a
+		next(ctx, system)
+
+	})
 }
 
-func ExecGetSession(s *usersystem.UserSystem, st usersystem.SessionType, id string) (*usersystem.Session, error) {
+func MustExecGetSession(s *usersystem.UserSystem, st usersystem.SessionType, id string) *usersystem.Session {
 	var session *usersystem.Session
-	ctx := usersystem.SessionContext(s.Context, session)
+	ctx := usersystem.SessionContext(s.SystemContext(), session)
 	ctx = usersystem.SessionTypeContext(ctx, st)
 	ctx = context.WithValue(ctx, ContextKeySessionID, id)
-	ctx, err := s.System.ExecActions(ctx, CommandGetSession)
-	if err != nil {
-		return nil, err
-	}
+	ctx = herbsystem.MustExecActions(ctx, s, CommandGetSession)
 	v := ctx.Value(usersystem.ContextKeySession)
 	if v == nil {
-		return nil, nil
+		return nil
 	}
-	return v.(*usersystem.Session), nil
+	return v.(*usersystem.Session)
 }

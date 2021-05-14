@@ -3,22 +3,24 @@ package usersession
 import (
 	"testing"
 
+	"github.com/herb-go/herbsystem"
+
 	"github.com/herb-go/usersystem"
 )
 
 func TestCheckSession(t *testing.T) {
 	s := usersystem.New()
-	s.InstallService(&testService{})
-	s.Ready()
-	s.Configuring()
-	s.Start()
-	defer s.Stop()
-	ok, err := ExecCheckSession(s, testSession("exists"))
-	if !ok || err != nil {
-		t.Fatal(ok, err)
+	s.MustRegisterSystemModule(&testModule{})
+	herbsystem.MustReady(s)
+	herbsystem.MustConfigure(s)
+	herbsystem.MustStart(s)
+	defer herbsystem.MustStop(s)
+	ok := MustExecCheckSession(s, testSession("exists"))
+	if !ok {
+		t.Fatal(ok)
 	}
-	ok, err = ExecCheckSession(s, testSession("notexists"))
-	if ok || err != nil {
-		t.Fatal(ok, err)
+	ok = MustExecCheckSession(s, testSession("notexists"))
+	if ok {
+		t.Fatal(ok)
 	}
 }

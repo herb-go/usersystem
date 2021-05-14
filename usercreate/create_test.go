@@ -1,102 +1,71 @@
 package usercreate
 
 import (
-	"errors"
+	"context"
 	"testing"
 
-	"github.com/herb-go/user"
 	"github.com/herb-go/herbsystem"
+	"github.com/herb-go/user"
 	"github.com/herb-go/usersystem"
 )
 
-type testService2 struct {
-	herbsystem.NopService
-}
-
-func (s *testService2) ServiceActions() []*herbsystem.Action {
-	return []*herbsystem.Action{
-		WrapRemove(func(id string) error {
-			if id == "removeerror" {
-				return errors.New("removeerror")
-			}
-			return nil
-		}),
-	}
-}
-func (s *testService2) ServiceName() string {
-	return "test2"
-}
-
-type testService struct {
-	herbsystem.NopService
+type testModule struct {
+	herbsystem.NopModule
 	IDList map[string]bool
 }
 
-func (s *testService) ServiceActions() []*herbsystem.Action {
-	return []*herbsystem.Action{
-		WrapExist(func(id string) (bool, error) {
-			return s.IDList[id], nil
+func (s *testModule) InitProcess(ctx context.Context, system herbsystem.System, next func(context.Context, herbsystem.System)) {
+	system.MountSystemActions(
+
+		WrapExist(func(id string) bool {
+			return s.IDList[id]
 		}),
-		WrapCreate(func(id string, next func() error) error {
+		WrapCreate(func(id string) {
 			_, ok := s.IDList[id]
 			if ok {
-				return user.ErrUserExists
+				panic(user.ErrUserExists)
 			}
 			s.IDList[id] = true
-			err := next()
-			if err != nil {
-				delete(s.IDList, id)
-			}
-			return err
-		}),
-		WrapRemove(func(id string) error {
+		}, func(id string) {
 			delete(s.IDList, id)
-			return nil
 		}),
-	}
+		WrapRemove(func(id string) {
+			delete(s.IDList, id)
+		}),
+	)
+	next(ctx, system)
 }
 
-func newTestService() *testService {
-	return &testService{
+func newTestModule() *testModule {
+	return &testModule{
 		IDList: map[string]bool{},
 	}
 }
 func TestCreate(t *testing.T) {
-	var err error
 	s := usersystem.New()
-	ss := newTestService()
-	s.InstallService(&testService2{})
-	s.InstallService(ss)
-	s.Ready()
-	s.Configuring()
-	s.Start()
-	defer s.Stop()
-	ok, err := ExecExist(s, "test")
-	if ok || err != nil {
+	m := newTestModule()
+	s.MustRegisterSystemModule(m)
+	herbsystem.MustReady(s)
+	herbsystem.MustConfigure(s)
+	herbsystem.MustStart(s)
+	defer herbsystem.MustStop(s)
+	ok := MustExecExist(s, "test")
+	if ok {
 		t.Fatal()
 	}
-	err = ExecCreate(s, "test")
-	if err != nil {
+	MustExecCreate(s, "test")
+	ok = MustExecExist(s, "test")
+	if !ok {
 		t.Fatal()
 	}
-	ok, err = ExecExist(s, "test")
-	if !ok || err != nil {
-		t.Fatal()
-	}
-	err = ExecCreate(s, "test")
+	err := herbsystem.Catch(func() { MustExecCreate(s, "test") })
 	if err != user.ErrUserExists {
 		t.Fatal()
 	}
-	err = ExecRemove(s, "test")
-	if err != nil {
+	MustExecRemove(s, "test")
+
+	ok = MustExecExist(s, "test")
+	if ok {
 		t.Fatal()
-	}
-	ok, err = ExecExist(s, "test")
-	if ok || err != nil {
-		t.Fatal()
-	}
-	err = ExecRemove(s, "removeerror")
-	if err.Error() != "removeerror" {
-		t.Fatal(err)
 	}
 }

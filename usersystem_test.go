@@ -17,14 +17,14 @@ func testSession(id string) *Session {
 
 func TestUserSystem(t *testing.T) {
 	s := New()
-	if GetUsersystem(s.Context) != s {
+	if GetUsersystem(s.context) != s {
 		t.Fatal(s)
 	}
-	if GetUID(UIDContext(s.Context, "test")) != "test" {
+	if GetUID(UIDContext(s.context, "test")) != "test" {
 		t.Fatal(s)
 	}
 	session := testSession("test")
-	if GetSession(SessionContext(s.Context, session)) != session {
+	if GetSession(SessionContext(s.context, session)) != session {
 		t.Fatal(s)
 	}
 	ds := NewPlainDataset()

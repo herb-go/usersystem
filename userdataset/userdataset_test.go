@@ -11,54 +11,46 @@ import (
 
 var testDatatype = usersystem.DataType("test")
 
-type testService struct {
-	herbsystem.NopService
+type testModule struct {
+	herbsystem.NopModule
 }
 
-func (s *testService) ServiceActions() []*herbsystem.Action {
-	return []*herbsystem.Action{
+func (s *testModule) InitProcess(ctx context.Context, system herbsystem.System, next func(context.Context, herbsystem.System)) {
+	system.MountSystemActions(
 		InitDatasetTypeAction(testDatatype),
-		WrapNewDataset(func(s *usersystem.UserSystem) (usersystem.Dataset, error) {
+		WrapNewDataset(func(s *usersystem.UserSystem) usersystem.Dataset {
 			ds := usersystem.NewPlainDataset()
-			err := ExecInitDataset(s, ds)
-			if err != nil {
-				return nil, err
-			}
-			return ds, nil
+			MustExecInitDataset(s, ds)
+			return ds
 		}),
-	}
+	)
+	next(ctx, system)
 }
 
 func TestInit(t *testing.T) {
 	s := usersystem.New()
-	s.InstallService(&testService{})
-	s.Ready()
-	s.Configuring()
-	s.Start()
-	ds, err := ExecNewDataset(s)
-	if err != nil {
-		panic(err)
-	}
+	s.MustRegisterSystemModule(&testModule{})
+	herbsystem.MustReady(s)
+	herbsystem.MustConfigure(s)
+	herbsystem.MustStart(s)
+	defer herbsystem.MustStop(s)
+	ds := MustExecNewDataset(s)
 	pds := ds.(*usersystem.PlainDataset)
 	_, ok := pds.Dataset[testDatatype]
 	if !ok {
 		t.Fatal(pds)
 	}
-	defer s.Stop()
 }
 func TestDefaultUserDataset(t *testing.T) {
 	s := usersystem.New()
-	s.Ready()
-	s.Configuring()
-	s.Start()
-	ds, err := ExecNewDataset(s)
-	if err != nil {
-		panic(err)
-	}
+	herbsystem.MustReady(s)
+	herbsystem.MustConfigure(s)
+	herbsystem.MustStart(s)
+	defer herbsystem.MustStop(s)
+	ds := MustExecNewDataset(s)
 	if ds == nil || ds.(*usersystem.PlainDataset) == nil {
 		t.Fatal(ds)
 	}
-	defer s.Stop()
 }
 
 func TestUtil(t *testing.T) {
