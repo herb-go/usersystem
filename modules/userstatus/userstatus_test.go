@@ -113,7 +113,7 @@ type testUsersystem struct {
 	herbsystem.NopModule
 }
 
-func (t *testUsersystem) InitProcess(ctx context.Context, system herbsystem.System, next func(context.Context, herbsystem.System)) {
+func (t *testUsersystem) InstallProcess(ctx context.Context, system herbsystem.System, next func(context.Context, herbsystem.System)) {
 	system.MountSystemActions(
 		usercreate.WrapCreate(func(id string) {
 			if id == "testcreateexsits" {

@@ -68,7 +68,7 @@ func (s *UserProfile) PurgeProcess(ctx context.Context, system herbsystem.System
 	next(ctx, system)
 
 }
-func (s *UserProfile) InitProcess(ctx context.Context, system herbsystem.System, next func(context.Context, herbsystem.System)) {
+func (s *UserProfile) InstallProcess(ctx context.Context, system herbsystem.System, next func(context.Context, herbsystem.System)) {
 
 	system.MountSystemActions(
 		herbsystem.CreateStartAction(s.StartProcess),

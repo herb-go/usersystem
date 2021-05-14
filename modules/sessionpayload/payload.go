@@ -63,7 +63,7 @@ func (s *SessionPayload) StopProcess(ctx context.Context, system herbsystem.Syst
 	next(ctx, system)
 }
 
-func (p *SessionPayload) InitProcess(ctx context.Context, system herbsystem.System, next func(context.Context, herbsystem.System)) {
+func (p *SessionPayload) InstallProcess(ctx context.Context, system herbsystem.System, next func(context.Context, herbsystem.System)) {
 	system.MountSystemActions(
 		herbsystem.CreateStartAction(p.StartProcess),
 		herbsystem.CreateStopAction(p.StopProcess),

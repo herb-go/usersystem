@@ -19,7 +19,7 @@ func (m *testModule) Purge(uid string) error {
 	return nil
 }
 
-func (m *testModule) InitProcess(ctx context.Context, system herbsystem.System, next func(context.Context, herbsystem.System)) {
+func (m *testModule) InstallProcess(ctx context.Context, system herbsystem.System, next func(context.Context, herbsystem.System)) {
 	system.MountSystemActions(Wrap(m))
 	next(ctx, system)
 }

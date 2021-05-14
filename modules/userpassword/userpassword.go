@@ -28,7 +28,7 @@ func (s *UserPassword) StartService() error {
 func (s *UserPassword) StopService() error {
 	return s.Service.Stop()
 }
-func (s *UserPassword) InitProcess(ctx context.Context, system herbsystem.System, next func(context.Context, herbsystem.System)) {
+func (s *UserPassword) InstallProcess(ctx context.Context, system herbsystem.System, next func(context.Context, herbsystem.System)) {
 	system.MountSystemActions(
 		herbsystem.WrapStartOrPanicAction(s.StartService),
 		herbsystem.WrapStopOrPanicAction(s.StopService),

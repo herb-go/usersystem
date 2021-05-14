@@ -14,7 +14,7 @@ type testModule struct {
 	IDList map[string]bool
 }
 
-func (s *testModule) InitProcess(ctx context.Context, system herbsystem.System, next func(context.Context, herbsystem.System)) {
+func (s *testModule) InstallProcess(ctx context.Context, system herbsystem.System, next func(context.Context, herbsystem.System)) {
 	system.MountSystemActions(
 
 		WrapExist(func(id string) bool {

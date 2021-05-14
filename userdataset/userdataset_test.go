@@ -15,7 +15,7 @@ type testModule struct {
 	herbsystem.NopModule
 }
 
-func (s *testModule) InitProcess(ctx context.Context, system herbsystem.System, next func(context.Context, herbsystem.System)) {
+func (s *testModule) InstallProcess(ctx context.Context, system herbsystem.System, next func(context.Context, herbsystem.System)) {
 	system.MountSystemActions(
 		InitDatasetTypeAction(testDatatype),
 		WrapNewDataset(func(s *usersystem.UserSystem) usersystem.Dataset {

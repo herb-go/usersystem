@@ -33,7 +33,7 @@ func (s *UserStatus) StartService() error {
 func (s *UserStatus) StopService() error {
 	return s.Service.Stop()
 }
-func (s *UserStatus) InitProcess(ctx context.Context, system herbsystem.System, next func(context.Context, herbsystem.System)) {
+func (s *UserStatus) InstallProcess(ctx context.Context, system herbsystem.System, next func(context.Context, herbsystem.System)) {
 	system.MountSystemActions(
 		herbsystem.WrapStartOrPanicAction(s.StartService),
 		herbsystem.WrapStopOrPanicAction(s.StopService),

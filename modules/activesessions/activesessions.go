@@ -44,7 +44,7 @@ func (s *ActiveSessions) StopService() error {
 func (s *ActiveSessions) MustOnSessionActive(session *usersystem.Session) {
 	s.Service.MustOnSessionActive(session)
 }
-func (s *ActiveSessions) InitProcess(ctx context.Context, system herbsystem.System, next func(context.Context, herbsystem.System)) {
+func (s *ActiveSessions) InstallProcess(ctx context.Context, system herbsystem.System, next func(context.Context, herbsystem.System)) {
 	system.MountSystemActions(
 		herbsystem.WrapStartOrPanicAction(s.StartService),
 		herbsystem.WrapStopOrPanicAction(s.StopService),

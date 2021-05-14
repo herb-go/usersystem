@@ -28,7 +28,7 @@ func (s *UserRole) StartService() error {
 func (s *UserRole) StopService() error {
 	return s.Service.Stop()
 }
-func (s *UserRole) InitProcess(ctx context.Context, system herbsystem.System, next func(context.Context, herbsystem.System)) {
+func (s *UserRole) InstallProcess(ctx context.Context, system herbsystem.System, next func(context.Context, herbsystem.System)) {
 	system.MountSystemActions(
 		herbsystem.WrapStartOrPanicAction(s.StartService),
 		herbsystem.WrapStopOrPanicAction(s.StopService),

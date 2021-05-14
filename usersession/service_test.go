@@ -22,7 +22,7 @@ type testModule struct {
 	herbsystem.NopModule
 }
 
-func (s *testModule) InitProcess(ctx context.Context, system herbsystem.System, next func(context.Context, herbsystem.System)) {
+func (s *testModule) InstallProcess(ctx context.Context, system herbsystem.System, next func(context.Context, herbsystem.System)) {
 	system.MountSystemActions(
 		WrapCheckSession(func(ctx context.Context, session *usersystem.Session) bool {
 			return session.UID() == "exists"

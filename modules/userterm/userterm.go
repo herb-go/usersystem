@@ -45,7 +45,7 @@ func (s *UserTerm) MustCheckSession(ctx context.Context, session *usersystem.Ses
 	sessionterm := session.Payloads.LoadString(PayloadTerm)
 	return term == sessionterm
 }
-func (s *UserTerm) InitProcess(ctx context.Context, system herbsystem.System, next func(context.Context, herbsystem.System)) {
+func (s *UserTerm) InstallProcess(ctx context.Context, system herbsystem.System, next func(context.Context, herbsystem.System)) {
 	system.MountSystemActions(
 		herbsystem.WrapStartOrPanicAction(s.StartService),
 		herbsystem.WrapStopOrPanicAction(s.StopService),
