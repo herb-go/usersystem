@@ -37,12 +37,12 @@ func (s *testService) Start() error {
 func (s *testService) Stop() error {
 	return nil
 }
-func (s *testService) MustLoadStatus(id string) status.Status {
+func (s *testService) MustLoadStatus(id string) (status.Status, bool) {
 	st, ok := s.Statuses[id]
 	if !ok {
-		panic(user.ErrUserNotExists)
+		return status.StatusUnkown, false
 	}
-	return st
+	return st, true
 }
 func (s *testService) MustUpdateStatus(id string, st status.Status) {
 	_, ok := s.Statuses[id]
@@ -186,13 +186,8 @@ func TestStatus(t *testing.T) {
 	if err != user.ErrUserExists {
 		t.Fatal()
 	}
-	err = herbsystem.Catch(
-		func() {
-			usercreate.MustExecRemove(s, "testcreate")
-		})
-	if err != user.ErrUserNotExists {
-		t.Fatal()
-	}
+	usercreate.MustExecRemove(s, "testcreate")
+
 	ok = usercreate.MustExecExist(s, "testcreate")
 	if ok {
 		t.Fatal()

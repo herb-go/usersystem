@@ -3,10 +3,7 @@ package userstatus
 import (
 	"context"
 
-	"github.com/herb-go/user/status"
-
 	"github.com/herb-go/herbsystem"
-	"github.com/herb-go/user"
 	"github.com/herb-go/usersystem"
 	"github.com/herb-go/usersystem/usercreate"
 	"github.com/herb-go/usersystem/userpurge"
@@ -42,17 +39,8 @@ func (s *UserStatus) InstallProcess(ctx context.Context, system herbsystem.Syste
 		usersession.WrapCheckSession(s.MustCheckSession),
 		userpurge.Wrap(s),
 		usercreate.WrapExist(func(id string) bool {
-			err := herbsystem.Catch(
-				func() {
-					s.Service.MustLoadStatus(id)
-				})
-			if err != nil {
-				if err == user.ErrUserNotExists {
-					return false
-				}
-				panic(err)
-			}
-			return true
+			_, found := s.Service.MustLoadStatus(id)
+			return found
 		}),
 		usercreate.WrapCreate(func(id string) {
 			s.Service.MustCreateStatus(id)
@@ -75,15 +63,9 @@ func (s *UserStatus) MustCheckSession(ctx context.Context, session *usersystem.S
 }
 
 func (s *UserStatus) MustIsUserAvaliable(id string) bool {
-	var st status.Status
-	err := herbsystem.Catch(func() {
-		st = s.Service.MustLoadStatus(id)
-	})
-	if err != nil {
-		if err == user.ErrUserNotExists {
-			return false
-		}
-		panic(err)
+	st, found := s.Service.MustLoadStatus(id)
+	if !found {
+		return false
 	}
 	ok, err := s.Service.IsAvailable(st)
 	if err != nil {

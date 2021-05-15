@@ -4,19 +4,17 @@ import "github.com/herb-go/user"
 
 type Service interface {
 	//Accounts return accounts of give uid.
-	Accounts(uid string) (*user.Accounts, error)
+	MustAccounts(uid string) *user.Accounts
 	//AccountToUID query uid by user account.
-	//Return user id and any error if raised.
+	//Return user id.
 	//Return empty string as userid if account not found.
-	AccountToUID(account *user.Account) (uid string, err error)
+	MustAccountToUID(account *user.Account) (uid string)
 	//BindAccount bind account to user.
-	//Return any error if raised.
 	//If account exists,user.ErrAccountBindingExists should be rasied.
-	BindAccount(uid string, account *user.Account) error
+	MustBindAccount(uid string, account *user.Account)
 	//UnbindAccount unbind account from user.
-	//Return any error if raised.
 	//If account not exists,user.ErrAccountUnbindingNotExists should be rasied.
-	UnbindAccount(uid string, account *user.Account) error
+	MustUnbindAccount(uid string, account *user.Account)
 	//Start start service
 	Start() error
 	//Stop stop service

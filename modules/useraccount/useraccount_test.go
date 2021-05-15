@@ -24,33 +24,31 @@ func (s *testService) Stop() error {
 }
 
 //Account return account of give uid.
-func (s *testService) Accounts(uid string) (*user.Accounts, error) {
+func (s *testService) MustAccounts(uid string) *user.Accounts {
 	v, ok := s.accounts[uid]
 	if !ok {
-		return user.NewAccounts(), nil
+		return user.NewAccounts()
 	}
-	return v, nil
+	return v
 }
 
 //AccountToUID query uid by user account.
-//Return user id and any error if raised.
 //Return empty string as userid if account not found.
-func (s *testService) AccountToUID(account *user.Account) (uid string, err error) {
+func (s *testService) MustAccountToUID(account *user.Account) (uid string) {
 	for k, v := range s.accounts {
 		if v.Exists(account) {
-			return k, nil
+			return k
 		}
 	}
-	return "", nil
+	return ""
 }
 
 //BindAccount bind account to user.
-//Return any error if raised.
 //If account exists,user.ErrAccountBindingExists should be rasied.
-func (s *testService) BindAccount(uid string, account *user.Account) error {
+func (s *testService) MustBindAccount(uid string, account *user.Account) {
 	for _, v := range s.accounts {
 		if v.Exists(account) {
-			return user.ErrAccountBindingExists
+			panic(user.ErrAccountBindingExists)
 		}
 	}
 	a, ok := s.accounts[uid]
@@ -58,14 +56,19 @@ func (s *testService) BindAccount(uid string, account *user.Account) error {
 		a = user.NewAccounts()
 		s.accounts[uid] = a
 	}
-	return a.Bind(account)
+	err := a.Bind(account)
+	if err != nil {
+		panic(err)
+	}
 }
 
 //UnbindAccount unbind account from user.
-//Return any error if raised.
 //If account not exists,user.ErrAccountUnbindingNotExists should be rasied.
-func (s *testService) UnbindAccount(uid string, account *user.Account) error {
-	return s.accounts[uid].Unbind(account)
+func (s *testService) MustUnbindAccount(uid string, account *user.Account) {
+	err := s.accounts[uid].Unbind(account)
+	if err != nil {
+		panic(err)
+	}
 }
 
 func (t *testService) Purge(uid string) error {
@@ -97,61 +100,45 @@ func TestUserAccount(t *testing.T) {
 	if err != nil {
 		panic(err)
 	}
-	accounts, err := useraccount.Accounts("test")
-	if err != nil {
-		panic(err)
-	}
+	accounts := useraccount.MustAccounts("test")
 	if len(accounts.Data()) != 0 {
 		t.Fatal()
 	}
-	uid, err := useraccount.AccountToUID(account)
-	if err != nil {
-		panic(err)
-	}
+	uid := useraccount.MustAccountToUID(account)
 	if uid != "" {
 		t.Fatal(uid)
 	}
-	err = useraccount.BindAccount("test", account)
-	if err != nil {
-		panic(err)
-	}
-	accounts, err = useraccount.Accounts("test")
-	if err != nil {
-		panic(err)
-	}
+	useraccount.MustBindAccount("test", account)
+
+	accounts = useraccount.MustAccounts("test")
+
 	if len(accounts.Data()) != 1 {
 		t.Fatal()
 	}
-	uid, err = useraccount.AccountToUID(account)
+	uid = useraccount.MustAccountToUID(account)
 	if err != nil {
 		panic(err)
 	}
 	if uid != "test" {
 		t.Fatal(uid)
 	}
-	err = useraccount.BindAccount("test", account)
+	useraccount.MustBindAccount("test", account)
 	if err != user.ErrAccountBindingExists {
 		t.Fatal(err)
 	}
-	err = useraccount.UnbindAccount("test", account2)
+	useraccount.MustUnbindAccount("test", account2)
 	if err != user.ErrAccountUnbindingNotExists {
 		t.Fatal(err)
 	}
-	err = useraccount.UnbindAccount("test", account)
+	useraccount.MustUnbindAccount("test", account)
 	if err != nil {
 		t.Fatal(err)
 	}
-	uid, err = useraccount.AccountToUID(account)
-	if err != nil {
-		panic(err)
-	}
+	uid = useraccount.MustAccountToUID(account)
 	if uid != "" {
 		t.Fatal(uid)
 	}
-	err = useraccount.UnbindAccount("test", account)
-	if err != user.ErrAccountUnbindingNotExists {
-		t.Fatal(err)
-	}
+	useraccount.MustUnbindAccount("test", account)
 }
 
 func TestMustGetModule(t *testing.T) {
