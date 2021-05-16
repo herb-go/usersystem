@@ -21,8 +21,8 @@ func (s *testService) Start() error {
 func (s *testService) Stop() error {
 	return nil
 }
-func (s *testService) VerifyPassword(uid string, password string) (bool, error) {
-	return password == s.Password, nil
+func (s *testService) MustVerifyPassword(uid string, password string) bool {
+	return password == s.Password
 }
 
 //PasswordChangeable return password changeable
@@ -32,9 +32,8 @@ func (s *testService) PasswordChangeable() bool {
 
 //UpdatePassword update user password
 //Return any error if raised
-func (s *testService) UpdatePassword(uid string, password string) error {
+func (s *testService) MustUpdatePassword(uid string, password string) {
 	s.Password = password
-	return nil
 }
 
 func (t *testService) Purge(uid string) error {
@@ -44,7 +43,6 @@ func newTestService() *testService {
 	return &testService{}
 }
 func TestUserPassword(t *testing.T) {
-	var err error
 	s := usersystem.New()
 	ss := newTestService()
 	userpassword := MustNewAndInstallTo(s)
@@ -60,24 +58,19 @@ func TestUserPassword(t *testing.T) {
 	if !ok {
 		t.Fatal()
 	}
-	err = userpassword.UpdatePassword("id", "old")
-	if err != nil {
-		panic(err)
-	}
-	ok, err = userpassword.VerifyPassword("id", "old")
-	if !ok || err != nil {
+	userpassword.MustUpdatePassword("id", "old")
+
+	ok = userpassword.MustVerifyPassword("id", "old")
+	if !ok {
 		t.Fatal()
 	}
-	err = userpassword.UpdatePassword("id", "new")
-	if err != nil {
-		panic(err)
-	}
-	ok, err = userpassword.VerifyPassword("id", "old")
-	if ok || err != nil {
+	userpassword.MustUpdatePassword("id", "new")
+	ok = userpassword.MustVerifyPassword("id", "old")
+	if ok {
 		t.Fatal()
 	}
-	ok, err = userpassword.VerifyPassword("id", "new")
-	if !ok || err != nil {
+	ok = userpassword.MustVerifyPassword("id", "new")
+	if !ok {
 		t.Fatal()
 	}
 }

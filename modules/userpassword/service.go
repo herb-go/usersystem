@@ -1,12 +1,11 @@
 package userpassword
 
 type Service interface {
-	VerifyPassword(uid string, password string) (bool, error)
+	MustVerifyPassword(uid string, password string) bool
 	//PasswordChangeable return password changeable
 	PasswordChangeable() bool
 	//UpdatePassword update user password
-	//Return any error if raised
-	UpdatePassword(uid string, password string) error
+	MustUpdatePassword(uid string, password string)
 	//Start start service
 	Start() error
 	//Stop stop service
