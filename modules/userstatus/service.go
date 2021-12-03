@@ -13,6 +13,7 @@ type Service interface {
 	MustCreateStatus(string)
 	//MustRemoveStatus remove user status
 	MustRemoveStatus(string)
+	//MustRemoveStatus list user by status
 	MustListUsersByStatus(last string, limit int, reverse bool, statuses ...status.Status) []string
 	status.Service
 	//Start start service
