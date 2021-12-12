@@ -7,8 +7,6 @@ import (
 
 	"github.com/herb-go/usersystem/userpurge"
 
-	"github.com/herb-go/usersystem/userdataset"
-
 	"github.com/herb-go/user/profile"
 
 	"github.com/herb-go/usersystem"
@@ -65,32 +63,26 @@ func TestUserProfile(t *testing.T) {
 	}
 	herbsystem.MustStart(s)
 	defer herbsystem.MustStop(s)
-	ds := userdataset.MustExecNewDataset(s)
-	result := profileservice.MustLoadProfiles(ds, false, "test")
+	result := profileservice.MustLoadProfiles("test")
 	if len(result) != 1 || len(result["test"].Data()) != 0 {
 		t.Fatal(result)
 	}
 	newprofile := profile.NewProfile().With("test", "testvalue").With("test2", "test2value")
-	profileservice.MustUpdateProfile(ds, "test", newprofile)
-	result = profileservice.MustLoadProfiles(ds, false, "test")
+	profileservice.MustUpdateProfile("test", newprofile)
+	result = profileservice.MustLoadProfiles("test")
 	if len(result) != 1 || len(result["test"].Data()) != 1 || result["test"].Load("test") != "testvalue" {
 		t.Fatal(result)
 	}
-	result = profileservice.MustLoadProfiles(ds, false, "test")
+	result = profileservice.MustLoadProfiles("test")
 	if len(result) != 1 || len(result["test"].Data()) != 1 || result["test"].Load("test") != "testvalue" {
 		t.Fatal(result)
 	}
 	newprofile = profile.NewProfile().With("test", "newvalue")
-	profileservice.MustUpdateProfile(nil, "test", newprofile)
+	profileservice.MustUpdateProfile("test", newprofile)
 	if err != nil {
 		panic(err)
 	}
-	result = profileservice.MustLoadProfiles(ds, false, "test")
-
-	if len(result) != 1 || result["test"].Load("test") != "testvalue" {
-		t.Fatal(result)
-	}
-	result = profileservice.MustLoadProfiles(ds, true, "test")
+	result = profileservice.MustLoadProfiles("test")
 	if len(result) != 1 || result["test"].Load("test") != "newvalue" {
 		t.Fatal(result)
 	}
